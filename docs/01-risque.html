@@ -87,7 +87,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
 <script src="site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="site_libs/quarto-search/fuse.min.js"></script>
@@ -105,11 +104,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
-  "location": "sidebar",
+  "location": "navbar",
   "copy-button": false,
   "collapse-after": 3,
-  "panel-placement": "start",
-  "type": "textbox",
+  "panel-placement": "end",
+  "type": "overlay",
   "limit": 20,
   "language": {
     "search-no-results-text": "Pas de résultats",
@@ -129,10 +128,72 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <link rel="stylesheet" href="style.css">
 </head>
 
-<body class="nav-sidebar docked">
+<body class="nav-sidebar floating nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Apprentissage supervisé - Laurent Rouvière</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item dropdown  compact">
+    <a class="nav-link dropdown-toggle" href="#" id="" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-download" role="img" aria-label="Download">
+</i> 
+ <span class="menu-text"></span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="">    
+        <li>
+    <a class="dropdown-item" href="./Apprentissage-supervisé-avec-R.pdf"><i class="bi bi-file-pdf" role="img">
+</i> 
+ <span class="dropdown-text">Download PDF</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./Apprentissage-supervisé-avec-R.epub"><i class="bi bi-journal" role="img">
+</i> 
+ <span class="dropdown-text">Download ePub</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown  compact">
+    <a class="nav-link dropdown-toggle" href="#" id="" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-share" role="img" aria-label="Share">
+</i> 
+ <span class="menu-text"></span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="">    
+        <li>
+    <a class="dropdown-item" href="https://twitter.com/intent/tweet?url=|url|"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="dropdown-text">Twitter</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|"><i class="bi bi-facebook" role="img">
+</i> 
+ <span class="dropdown-text">Facebook</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+              <div class="quarto-toggle-container">
+                  <a href="" class="quarto-reader-toggle nav-link" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+              </div>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
   <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
     <div class="container-fluid d-flex justify-content-between">
       <h1 class="quarto-secondary-nav-title"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Calcul de risques avec R</span></h1>
@@ -143,46 +204,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation docked overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header">
-    <div class="sidebar-title mb-0 py-0">
-      <a href="./">Apprentissage supervisé avec R</a> 
-        <div class="sidebar-tools-main">
-    <a href="" title="Download" id="sidebar-tool-dropdown-0" class="sidebar-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-download"></i></a>
-    <ul class="dropdown-menu" aria-labelledby="sidebar-tool-dropdown-0">
-        <li>
-          <a class="dropdown-item sidebar-tools-main-item" href="./Apprentissage-supervisé-avec-R.pdf">
-            <i class="bi bi-bi-file-pdf pe-1"></i>
-          Download PDF
-          </a>
-        </li>
-        <li>
-          <a class="dropdown-item sidebar-tools-main-item" href="./Apprentissage-supervisé-avec-R.epub">
-            <i class="bi bi-bi-journal pe-1"></i>
-          Download ePub
-          </a>
-        </li>
-    </ul>
-    <a href="" title="Share" id="sidebar-tool-dropdown-1" class="sidebar-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-share"></i></a>
-    <ul class="dropdown-menu" aria-labelledby="sidebar-tool-dropdown-1">
-        <li>
-          <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=|url|">
-            <i class="bi bi-bi-twitter pe-1"></i>
-          Twitter
-          </a>
-        </li>
-        <li>
-          <a class="dropdown-item sidebar-tools-main-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
-            <i class="bi bi-bi-facebook pe-1"></i>
-          Facebook
-          </a>
-        </li>
-    </ul>
-</div>
-    </div>
-      </div>
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
       <div class="mt-2 flex-shrink-0 align-items-center">
         <div class="sidebar-search">
         <div id="quarto-search" class="" title="Search"></div>
@@ -276,7 +300,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </nav>
     </div>
 <!-- main -->
-<main class="content column-body" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
@@ -307,12 +331,12 @@ div.correction {
   border: 2px solid orange;
   border-radius: 10px;
   padding: 1em;
-  /*display: none;*/
+  display: none;
 }
 
 .corR {
   font-style: italic;
-  /*display: none;*/
+  display: none;
 }
 
 .algo{
@@ -384,71 +408,31 @@ div.correction {
 </p>
 <ol type="1">
 <li><p>Séparer les données en un échantillon d’apprentissage de taille 300 et un échantillon test de taille 200.</p>
-<div class="cell" data-teacher="true">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>index.app <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">500</span>,<span class="dv">300</span>)  </span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>dapp <span class="ot">&lt;-</span> donnees[index.app,]</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>dtest <span class="ot">&lt;-</span> donnees[<span class="sc">-</span>index.app,]</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-teacher="false">
+
 </div></li>
 <li><p>A l’aide de la fonction <strong>kknn</strong> du package <strong>kknn</strong> entraîner la règle des 3 plus proches voisins sur les données d’apprentissage et calculer les groupes prédits par cette règle des données test.</p>
-<div class="cell" data-teacher="true">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kknn)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>prev3ppv <span class="ot">&lt;-</span> <span class="fu">kknn</span>(Y<span class="sc">~</span>.,<span class="at">train=</span>dapp,<span class="at">test=</span>dtest,<span class="at">k=</span><span class="dv">3</span>,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">kernel=</span><span class="st">"rectangular"</span>)<span class="sc">$</span>fitted.values</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(prev3ppv)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0 0 1 1 1 0</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Levels: 0 1</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-teacher="false">
+
 </div></li>
 <li><p>En déduire une estimation de l’erreur de classification de la règle des 3 plus proches voisins.</p>
 <div class="corR">
 <p>Il suffit de calculer la proportion de mauvaises prévisions sur les données test :</p>
 </div>
-<div class="cell" data-teacher="true">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(prev3ppv<span class="sc">!=</span>dtest<span class="sc">$</span>Y)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.42</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-teacher="false">
+
 </div></li>
 <li><p>Retrouver le résultat précédent à l’ai de la fonction <code>accuracy</code> du package <code>yardstick</code>.</p>
-<div class="cell" data-teacher="true">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(yardstick)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>tbl <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">prev=</span>prev3ppv,<span class="at">obs=</span>dtest<span class="sc">$</span>Y)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy</span>(tbl,<span class="at">truth=</span>obs,<span class="at">estimate=</span>prev)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 1 × 3</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="do">##   .metric  .estimator .estimate</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt;</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 accuracy binary          0.58</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">-</span>(<span class="fu">accuracy</span>(tbl,<span class="at">truth=</span>obs,<span class="at">estimate=</span>prev) <span class="sc">|&gt;</span> <span class="fu">select</span>(.estimate))</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="do">##   .estimate</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 1      0.42</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-teacher="false">
+
 </div></li>
 <li><p>Toujours à l’aide des fonctiosn de <code>yardstick</code>, calculer la spécificité, le sensibilité et le balanced accuracy. On pourra consulter la page <a href="https://yardstick.tidymodels.org/articles/metric-types.html#metrics" class="uri">https://yardstick.tidymodels.org/articles/metric-types.html#metrics</a></p>
-<div class="cell" data-teacher="true">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>tbl <span class="sc">|&gt;</span> <span class="fu">spec</span>(<span class="at">truth=</span>obs,<span class="at">estimate=</span>prev)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 1 × 3</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="do">##   .metric .estimator .estimate</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 spec    binary         0.604</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>tbl <span class="sc">|&gt;</span> <span class="fu">sens</span>(<span class="at">truth=</span>obs,<span class="at">estimate=</span>prev)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 1 × 3</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="do">##   .metric .estimator .estimate</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 sens    binary         0.553</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>tbl <span class="sc">|&gt;</span> <span class="fu">bal_accuracy</span>(<span class="at">truth=</span>obs,<span class="at">estimate=</span>prev)</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 1 × 3</span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="do">##   .metric      .estimator .estimate</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;chr&gt;        &lt;chr&gt;          &lt;dbl&gt;</span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 bal_accuracy binary         0.578</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-teacher="false">
+
 </div></li>
 <li><p>Retrouver les résultats précédents en utilisant la fonction <code>metric_set</code>.</p>
-<div class="cell" data-teacher="true">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>multi_metric <span class="ot">&lt;-</span> <span class="fu">metric_set</span>(accuracy,spec,sens,bal_accuracy)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>tbl <span class="sc">|&gt;</span> <span class="fu">multi_metric</span>(<span class="at">truth=</span>obs,<span class="at">estimate=</span>prev)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 4 × 3</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="do">##   .metric      .estimator .estimate</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;chr&gt;        &lt;chr&gt;          &lt;dbl&gt;</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 accuracy     binary         0.58 </span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 spec         binary         0.604</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="do">## 3 sens         binary         0.553</span></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="do">## 4 bal_accuracy binary         0.578</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-teacher="false">
+
 </div></li>
 </ol>
 </div>
@@ -481,58 +465,48 @@ y(s)=1-\beta(s)=\mathbf P(S(X)\geq s|Y=1)
 <p><span class="theorem-title"><strong>Exercice 1.3 (Courbe ROC avec yardstick) </strong></span>On reprend les données de l’<a href="#exr-exo-intro-kppv">Exercice&nbsp;<span>1.1</span></a> et on considère toujours la règle des 3 plus proches voisins entrainée sur les données d’apprentissage.</p>
 <ol type="1">
 <li><p>Toujours pour la règle des 3 plus proches voisins, calculer les probabilités <span class="math inline">\(\mathbf P(Y=1|X=x)\)</span> prédites pour les données tests.</p>
-<div class="cell" data-teacher="true">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>prob3ppv <span class="ot">&lt;-</span> <span class="fu">kknn</span>(Y<span class="sc">~</span>.,<span class="at">train=</span>dapp,<span class="at">test=</span>dtest,<span class="at">k=</span><span class="dv">3</span>,</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">kernel=</span><span class="st">"rectangular"</span>)<span class="sc">$</span>prob[,<span class="dv">2</span>]</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-teacher="false">
+
 </div></li>
 <li><p>En déduire une estimation de la courbe ROC de la règle des 3 plus proches voisins. On pourra utiliser la fonction <strong>roc_curve</strong> du package <strong>yardstick</strong>.</p>
-<div class="cell" data-teacher="true">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>tbl <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">obs=</span>dtest<span class="sc">$</span>Y,<span class="at">prob=</span>prob3ppv)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>tbl <span class="sc">|&gt;</span> <span class="fu">roc_curve</span>(<span class="at">truth=</span>obs,prob,<span class="at">event_level=</span><span class="st">"second"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">autoplot</span>()</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="01-risque_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
-</div>
+<div class="cell" data-teacher="false">
+
 </div></li>
 </ol>
 </div>
 <div id="exr-exo-ROC-avecR" class="theorem exercise">
 <p><span class="theorem-title"><strong>Exercice 1.4 (Autres outils R pour la courbe ROC) </strong></span>On dispose de 4 fonctions de score <span class="math inline">\(S_j(x)\)</span> dont on souhaite visualiser les courbes ROC à partir des valeurs de score calculés sur un échantillon. On trouvera dans le tableau <code>df</code> les scores <span class="math inline">\(S_j(X_i),i=1,\dots,n\)</span> ainsi que les observations des groupes <span class="math inline">\(Y_i\)</span></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n,<span class="dv">1</span>,<span class="fl">0.5</span>)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>S1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n)</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>S2 <span class="ot">&lt;-</span> S1</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>S2[Y<span class="sc">==</span><span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="fu">sum</span>(Y<span class="sc">==</span><span class="dv">1</span>),<span class="fl">0.6</span>,<span class="dv">1</span>)</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>S2[Y<span class="sc">==</span><span class="dv">0</span>] <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="fu">sum</span>(Y<span class="sc">==</span><span class="dv">0</span>),<span class="dv">0</span>,<span class="fl">0.6</span>)</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>S3 <span class="ot">&lt;-</span> S2</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>S3[Y<span class="sc">==</span><span class="dv">1</span>][<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>] <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">10</span>,<span class="dv">0</span>,<span class="fl">0.6</span>)</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>S3[Y<span class="sc">==</span><span class="dv">0</span>][<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>] <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">10</span>,<span class="fl">0.6</span>,<span class="dv">1</span>)</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>(tbl <span class="ot">&lt;-</span> <span class="fu">tibble</span>(S1,S2,S3,<span class="at">Y=</span>Y))</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 200 × 4</span></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="do">##        S1    S2      S3     Y</span></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="do">##     &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt;</span></span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="do">##  1 0.589  0.630 0.420       1</span></span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="do">##  2 0.893  0.790 0.00624     1</span></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="do">##  3 0.124  0.706 0.302       1</span></span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="do">##  4 0.513  0.692 0.439       1</span></span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="do">##  5 0.664  0.203 0.806       0</span></span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="do">##  6 0.766  0.404 0.666       0</span></span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="do">##  7 0.0926 0.194 0.954       0</span></span>
-<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="do">##  8 0.0676 0.838 0.198       1</span></span>
-<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="do">##  9 0.556  0.664 0.492       1</span></span>
-<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="do">## 10 0.651  0.942 0.531       1</span></span>
-<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="do">## # … with 190 more rows</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n,<span class="dv">1</span>,<span class="fl">0.5</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>S1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>S2 <span class="ot">&lt;-</span> S1</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>S2[Y<span class="sc">==</span><span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="fu">sum</span>(Y<span class="sc">==</span><span class="dv">1</span>),<span class="fl">0.6</span>,<span class="dv">1</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>S2[Y<span class="sc">==</span><span class="dv">0</span>] <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="fu">sum</span>(Y<span class="sc">==</span><span class="dv">0</span>),<span class="dv">0</span>,<span class="fl">0.6</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>S3 <span class="ot">&lt;-</span> S2</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>S3[Y<span class="sc">==</span><span class="dv">1</span>][<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>] <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">10</span>,<span class="dv">0</span>,<span class="fl">0.6</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>S3[Y<span class="sc">==</span><span class="dv">0</span>][<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>] <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">10</span>,<span class="fl">0.6</span>,<span class="dv">1</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>(tbl <span class="ot">&lt;-</span> <span class="fu">tibble</span>(S1,S2,S3,<span class="at">Y=</span>Y))</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 200 × 4</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="do">##        S1    S2      S3     Y</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="do">##     &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt;</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="do">##  1 0.589  0.630 0.420       1</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="do">##  2 0.893  0.790 0.00624     1</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="do">##  3 0.124  0.706 0.302       1</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="do">##  4 0.513  0.692 0.439       1</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="do">##  5 0.664  0.203 0.806       0</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="do">##  6 0.766  0.404 0.666       0</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="do">##  7 0.0926 0.194 0.954       0</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="do">##  8 0.0676 0.838 0.198       1</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="do">##  9 0.556  0.664 0.492       1</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="do">## 10 0.651  0.942 0.531       1</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="do">## # … with 190 more rows</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol type="1">
 <li><p>Visualiser, pour chaque score, les valeurs de score en fonction de <span class="math inline">\(Y\)</span>. Commenter</p>
-<div class="cell" data-teacher="true">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>tbl1 <span class="ot">&lt;-</span> tbl <span class="sc">|&gt;</span> <span class="fu">pivot_longer</span>(<span class="sc">-</span>Y,<span class="at">names_to=</span><span class="st">"Score"</span>,<span class="at">values_to=</span><span class="st">"valeurs"</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tbl1)<span class="sc">+</span><span class="fu">aes</span>(<span class="at">x=</span>valeurs,<span class="at">y=</span>Score,<span class="at">color=</span><span class="fu">as.factor</span>(Y))<span class="sc">+</span><span class="fu">geom_point</span>()<span class="sc">+</span><span class="fu">labs</span>(<span class="at">color=</span><span class="st">"Y"</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="01-risque_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
-</div>
+<div class="cell" data-teacher="false">
+
 </div>
 <div class="corR">
 <p>On remarque que <strong>S2</strong> sépare parfaitement les deux groupes. La séparation de <strong>S3</strong> est satisfaisante mais pas parfaite. <strong>S1</strong> semble quant à lui ordonner les observations indépendamment du groupe (proche du score aléatoire).</p>
@@ -541,104 +515,49 @@ y(s)=1-\beta(s)=\mathbf P(S(X)\geq s|Y=1)
 <div class="corR">
 <p>Avec <strong>pROC</strong> on peut combiner les fonction <strong>roc</strong> et <strong>plot</strong>.</p>
 </div>
-<div class="cell" data-teacher="true">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pROC)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>roc.obj <span class="ot">&lt;-</span> <span class="fu">roc</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>tbl)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(roc.obj[[<span class="dv">1</span>]]) </span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(roc.obj[[<span class="dv">2</span>]],<span class="at">add=</span><span class="cn">TRUE</span>,<span class="at">col=</span><span class="st">"red"</span>)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(roc.obj[[<span class="dv">3</span>]],<span class="at">add=</span><span class="cn">TRUE</span>,<span class="at">col=</span><span class="st">"blue"</span>)</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>,<span class="at">legend=</span><span class="fu">c</span>(<span class="st">"S1"</span>,<span class="st">"S2"</span>,<span class="st">"S3"</span>),<span class="at">col=</span><span class="fu">c</span>(<span class="st">"black"</span>,<span class="st">"red"</span>,<span class="st">"blue"</span>),<span class="at">lwd=</span><span class="dv">3</span>,<span class="at">cex=</span><span class="fl">0.5</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="01-risque_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
-</div>
+<div class="cell" data-teacher="false">
+
 </div>
 <div class="corR">
 <p><strong>pROC</strong> possède également une fonction <strong>ggroc</strong> qui permet d’obtenir les courbes ROC en <strong>ggplot</strong>.</p>
 </div>
-<div class="cell" data-teacher="true">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>pROC<span class="sc">::</span><span class="fu">ggroc</span>(roc.obj)<span class="sc">+</span><span class="fu">labs</span>(<span class="at">color=</span><span class="st">"Score"</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="01-risque_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
-</div>
+<div class="cell" data-teacher="false">
+
 </div>
 <div class="corR">
 <p>Pour <strong>plotROC</strong> on utilise le verbe <strong>geom_roc</strong> :</p>
 </div>
-<div class="cell" data-teacher="true">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plotROC)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tbl1)<span class="sc">+</span><span class="fu">aes</span>(<span class="at">d=</span>Y,<span class="at">m=</span>valeurs,<span class="at">color=</span>Score)<span class="sc">+</span><span class="fu">geom_roc</span>(<span class="at">n.cuts=</span><span class="dv">0</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="01-risque_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
-</div>
+<div class="cell" data-teacher="false">
+
 </div>
 <div class="corR">
 <p>Enfin avec <strong>roc_curve</strong> :</p>
 </div>
-<div class="cell" data-teacher="true">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>tbl <span class="sc">|&gt;</span> <span class="fu">pivot_longer</span>(<span class="sc">-</span>Y,<span class="at">names_to =</span> <span class="st">"Score"</span>,<span class="at">values_to =</span> <span class="st">"valeur"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Score) <span class="sc">|&gt;</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">roc_curve</span>(<span class="at">truth=</span><span class="fu">as.factor</span>(Y),valeur,<span class="at">event_level=</span><span class="st">"second"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">autoplot</span>()</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="01-risque_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
-</div>
+<div class="cell" data-teacher="false">
+
 </div></li>
 <li><p>Calculer les <code>AUC</code> à l’aide de la fonction <code>auc</code>de <code>pROC</code> puis <code>roc_auc</code> de <code>yardstick</code>.</p>
-<div class="cell" data-teacher="true">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lapply</span>(roc.obj,auc)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="do">## $S1</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Area under the curve: 0.5785</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="do">## $S2</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Area under the curve: 1</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="do">## $S3</span></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="do">## Area under the curve: 0.9148</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-teacher="false">
+
 </div>
 <div class="corR">
 <p>On peut aussi les obtenir avec la syntaxe <strong>dplyr</strong></p>
 </div>
-<div class="cell" data-teacher="true">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>tbl <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">Y=</span><span class="fu">as.factor</span>(Y)) <span class="sc">|&gt;</span> <span class="fu">summarize_at</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="sc">~</span><span class="fu">auc</span>(Y,.)) <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="dv">3</span>)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 1 × 3</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="do">##      S1    S2    S3</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 0.579     1 0.915</span></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>tbl1 <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">Y=</span><span class="fu">as.factor</span>(Y)) <span class="sc">|&gt;</span>  <span class="fu">group_by</span>(Score) <span class="sc">|&gt;</span> </span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">AUC=</span><span class="fu">round</span>(<span class="fu">as.numeric</span>(<span class="fu">auc</span>(Y,valeurs)),<span class="dv">3</span>)) </span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 3 × 2</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="do">##   Score   AUC</span></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;chr&gt; &lt;dbl&gt;</span></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 S1    0.579</span></span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 S2    1    </span></span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="do">## 3 S3    0.915</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-teacher="false">
+
 </div>
 <div class="corR">
 <p>On peut obtenir les mêmes valeurs avec <code>roc_auc</code> :</p>
 </div>
-<div class="cell" data-teacher="true">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>tbl <span class="sc">|&gt;</span> <span class="fu">pivot_longer</span>(<span class="sc">-</span>Y,<span class="at">names_to =</span> <span class="st">"Score"</span>,<span class="at">values_to =</span> <span class="st">"valeur"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Score) <span class="sc">|&gt;</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">roc_auc</span>(<span class="at">truth=</span><span class="fu">as.factor</span>(Y),valeur,<span class="at">event_level=</span><span class="st">"second"</span>) </span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 3 × 4</span></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="do">##   Score .metric .estimator .estimate</span></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;</span></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 S1    roc_auc binary         0.579</span></span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 S2    roc_auc binary         1    </span></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="do">## 3 S3    roc_auc binary         0.915</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-teacher="false">
+
 </div></li>
 <li><p>On rappelle que l’AUC vérifier la propriété suivante : si <span class="math inline">\((X_1,Y_1)\)</span> et <span class="math inline">\((X_2,Y_2)\)</span> sont indépendantes et de même loi que <span class="math inline">\((X,Y)\)</span> et que <span class="math inline">\(S(X)\)</span> est continue, on a <span class="math display">\[AUC(S)=\mathbf P(S(X_1)\geq S(X_2)|(Y_1,Y_2)=(1,-1)).\]</span> Utiliser cette propriété pour retrouver l’AUC de S3.</p>
 <div class="corR">
 <p>On peut estimer l’AUC en calculant, parmi les paires qui vérifient <span class="math inline">\((Y_1,Y_2)=(1,-1)\)</span>, la proportion de paires qui vérifient <span class="math inline">\(S(X_1)\lt S(X_2)\)</span>. Si on note <span class="math display">\[\mathcal I=\{(i,j),y_i=1,y_j=0\},\]</span> alors l’estimateur s’écrit <span class="math display">\[\widehat{AUC}(S)=\frac{1}{|\mathcal I|}\sum_{(i,j)\in\mathcal I}\mathbf 1_{S(X_i)&gt;S(S_j)}.\]</span></p>
 </div>
-<div class="cell" data-teacher="true">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>D0 <span class="ot">&lt;-</span> <span class="fu">which</span>(tbl<span class="sc">$</span>Y<span class="sc">==</span><span class="dv">0</span>)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>D1 <span class="ot">&lt;-</span> <span class="fu">which</span>(tbl<span class="sc">$</span>Y<span class="sc">==</span><span class="dv">1</span>)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>S30 <span class="ot">&lt;-</span> S3[D0]</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>S31 <span class="ot">&lt;-</span> S3[D1]</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>S3<span class="fl">.01</span> <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">S30=</span>S30,<span class="at">S31=</span>S31)</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(S3<span class="fl">.01</span><span class="sc">$</span>S31<span class="sc">&gt;</span>S3<span class="fl">.01</span><span class="sc">$</span>S30)</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.9147727</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-teacher="false">
+
 </div></li>
 </ol>
 </div>
@@ -872,7 +791,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
-<nav class="page-navigation column-body">
+<nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="./index.html" class="pagination-link">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Présentation</span>
