@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Apprentissage supervisé avec R - 2&nbsp; Estimation du risque par ré-échantillonnage</title>
+<title>Apprentissage supervisé avec R - 7&nbsp; Forêts aléatoires</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -83,6 +83,25 @@ code span.st { color: #4070a0; } /* String */
 code span.va { color: #19177c; } /* Variable */
 code span.vs { color: #4070a0; } /* VerbatimString */
 code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
 </style>
 
 
@@ -92,8 +111,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./03-comp-risque.html" rel="next">
-<link href="./01-risque.html" rel="prev">
+<link href="./08-boosting.html" rel="next">
+<link href="./06-arbres.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -199,7 +218,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     </nav>
   <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
     <div class="container-fluid d-flex justify-content-between">
-      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Estimation du risque par ré-échantillonnage</span></h1>
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Forêts aléatoires</span></h1>
       <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
         <i class="bi bi-chevron-right"></i>
       </button>
@@ -237,7 +256,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./02-est-risque.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Estimation du risque par ré-échantillonnage</span></a>
+  <a href="./02-est-risque.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Estimation du risque par ré-échantillonnage</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -282,7 +301,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./07-forets.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Forêts aléatoires</span></a>
+  <a href="./07-forets.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Forêts aléatoires</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -305,21 +324,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </nav>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Table des matières</h2>
-   
-  <ul>
-  <li><a href="#validation-croisée" id="toc-validation-croisée" class="nav-link active" data-scroll-target="#validation-croisée"><span class="toc-section-number">2.1</span>  Validation croisée</a></li>
-  <li><a href="#le-package-tidymodels" id="toc-le-package-tidymodels" class="nav-link" data-scroll-target="#le-package-tidymodels"><span class="toc-section-number">2.2</span>  Le package tidymodels</a></li>
-  </ul>
-</nav>
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span id="sec-tidymodels" class="quarto-section-identifier d-none d-lg-block"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Estimation du risque par ré-échantillonnage</span></span></h1>
+<h1 class="title"><span id="sec-forets" class="quarto-section-identifier d-none d-lg-block"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Forêts aléatoires</span></span></h1>
 </div>
 
 
@@ -364,176 +376,217 @@ div.correction {
 <div class="cell">
 
 </div>
-<p>Rappelons que, pour une fonction de perte <span class="math inline">\(\ell\)</span> donnée, le risque de <span class="math inline">\(f_n\)</span> est défini par</p>
+<p>Les méthodes par arbres présentées précédemment sont des algorithmes qui possèdent tout un tas de qualités (facile à mettre en œuvre, interprétable…). Ce sont néanmoins rarement les algorithmes qui se révèlent les plus performants. Les méthodes d’agrégation d’arbres présentées dans cette partie sont souvent beaucoup plus pertinentes, notamment en terme de qualité de prédiction. Elles consistent à construire un très grand nombre d’arbres “simples” : <span class="math inline">\(g_1,\dots,g_B\)</span> et à les agréger en faisant la moyenne : <span class="math display">\[\frac{1}{B}\sum_{k=1}^Bg_k(x).\]</span> Les forêts aléatoires <span class="citation" data-cites="bre01">(<a href="references.html#ref-bre01" role="doc-biblioref">Breiman 2001</a>)</span> et le gradient boosting <span class="citation" data-cites="fri01">(<a href="references.html#ref-fri01" role="doc-biblioref">Friedman 2001</a>)</span> utilisent ce procédé d’agrégation. Dans ce chapitre on étudiera ces algorithmes sur le je de données <code>spam</code> :</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kernlab)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(spam)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>spam <span class="ot">&lt;-</span> spam[<span class="fu">sample</span>(<span class="fu">nrow</span>(spam)),]</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Le problème est d’expliquer la variable binaire <strong>type</strong> par les autres.</p>
+<p>L’algorithme des forêts aléatoires consiste à construire des arbres sur des échantillons bootstrap et à les agréger. Il peut s’écrire de la façon suivante :</p>
+<div class="algo">
+<p><strong>Entrées</strong> :</p>
+<ul>
+<li><span class="math inline">\(x\in\mathbb R^d\)</span> l’observation à prévoir, <span class="math inline">\(\mathcal D_n\)</span> l’échantillon ;</li>
+<li><span class="math inline">\(B\)</span> nombre d’arbres ; <span class="math inline">\(n_{max}\)</span> nombre max d’observations par nœud</li>
+<li><span class="math inline">\(m\in\{1,\dots,d\}\)</span> le nombre de variables candidates pour découper un nœud.</li>
+</ul>
+<p><strong>Algorithme</strong> : pour <span class="math inline">\(k=1,\dots,B\)</span> :</p>
+<ol type="1">
+<li>Tirer un échantillon <em>bootstrap</em> dans <span class="math inline">\(\mathcal D_n\)</span></li>
+<li>Construire un <em>arbre CART sur cet échantillon bootstrap</em>, chaque coupure est sélectionnée en minimisant la fonction de coût de CART sur un ensemble de <span class="math inline">\(m\)</span> variables choisies au hasard parmi les <span class="math inline">\(d\)</span>. On note <span class="math inline">\(T(.,\theta_k,\mathcal D_n)\)</span> l’arbre construit.</li>
+</ol>
+<p><strong>Sortie</strong> : l’estimateur <span class="math inline">\(T_B(x)=\frac{1}{B}\sum_{k=1}^BT(x,\theta_k,\mathcal D_n)\)</span>.</p>
+</div>
+<p>Cet algorithme peut être utilisé sur <strong>R</strong> avec la fonction <strong>randomForest</strong> du package <strong>randomForest</strong> ou la fonction <strong>ranger</strong> du package <strong>ranger</strong>.</p>
+<div id="exr-exo-biais-var-bagging" class="theorem exercise">
+<p><span class="theorem-title"><strong>Exercice 7.1 (Biais et variance des algorithmes bagging) </strong></span>Comparer le biais et la variance de la forêt <span class="math inline">\(T_B(x)\)</span> au biais et à la variance d’un arbre de la forêt <span class="math inline">\(T(x,\theta_k,\mathcal D_n)\)</span>. On pourra utiliser <span class="math inline">\(\rho(x)=\text{corr}(T(x,\theta_1,\mathcal D_n),T(x,\theta_2,\mathcal D_n))\)</span> pour comparer les variances.</p>
+<div class="correction">
+<p>Pour simplifier les notations on considère <span class="math inline">\(T_1,\dots,T_B\)</span> <span class="math inline">\(B\)</span> variables aléatoires de même loi et de variance <span class="math inline">\(\sigma^2\)</span>. Il est facile de voir que <span class="math inline">\(\mathbf E[\bar T]=\mathbf E[T_1]\)</span>. Pour la variance on a</p>
 <p><span class="math display">\[
-\mathcal R(f_n)=\mathbf E[\ell(Y,f_n(X,\mathcal D_n))]=\mathbf E_{\mathcal D_n}[\mathbf E_{(X,Y)}[\ell(Y,f_n(X,\mathcal D_n))]].
+\begin{aligned}
+\mathbf V[\bar T]= &amp; \frac{1}{B^2}\mathbf V\left[\sum_{i=1}^BT_i\right]= \frac{1}{B^2}\left[\sum_{i=1}^V\mathbf V[T_i]+\sum_{i\neq j}\mathbf{cov}(T_i,T_j)\right] \\
+= &amp; \frac{1}{B^2}\left[B\sigma^2+B(B-1)\rho\sigma^2\right]=\rho\sigma^2+\frac{1-\rho}{B}\sigma^2.
+\end{aligned}
 \]</span></p>
-<p>Il représente la perte moyenne de <span class="math inline">\(f_n\)</span> par rapport aux lois de <span class="math inline">\((X,Y)\)</span> et de <span class="math inline">\(\mathcal D_n\)</span>. Ces lois étant inconnues, l’utilisateur n’a jamais accès à <span class="math inline">\(\mathcal R(f_n)\)</span> et doit donc l’estimer. Nous présentons dans ce chapitre les méthodes classiques qui reposent sur des techniques de ré-échantillonnage.</p>
-<section id="validation-croisée" class="level2" data-number="2.1">
-<h2 data-number="2.1" class="anchored" data-anchor-id="validation-croisée"><span class="header-section-number">2.1</span> Validation croisée</h2>
-<div id="exr-exo-reech-rsample" class="theorem exercise">
-<p><span class="theorem-title"><strong>Exercice 2.1 (Calculs de blocs avec rsample) </strong></span>Le package <strong>rsample</strong> permet d’obtenir des partitions des données pour calculer des estimations de risques. On s’intéresse dans cet exercice aux fonctions</p>
-<ul>
-<li><strong>mc_cv</strong> pour partager les données en 2 (<em>validation hold out</em>)</li>
-<li><strong>vfold_cv</strong> pour partager les données en blocs (<em>validation croisée</em>)</li>
-</ul>
-<p>On reprend les données générées avec la fonction du chapitre précédent :</p>
+<p>Considérons <span class="math inline">\(\rho\leq 0\)</span>. On déduit de l’équation précédente que <span class="math inline">\(B\leq 1-1/\rho\)</span>. Par exemple si <span class="math inline">\(\rho=-1\)</span>, <span class="math inline">\(B\)</span> doit être inférieur ou égal à 2. Il n’est en effet pas possible de considérer 3 variables aléatoires de même loi dont les corrélations 2 à 2 sont égales à -1. De même si <span class="math inline">\(\rho=-1/2\)</span>, <span class="math inline">\(B\leq 3\)</span>…</p>
+</div>
+</div>
+<div id="exr-exo-foret-comp-ranger-RF" class="theorem exercise">
+<p><span class="theorem-title"><strong>Exercice 7.2 (RandomForest versus ranger) </strong></span>On sépare le jeu de données <code>spam</code> en un échantillon d’apprentissage et un échantillon test :</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>donnees <span class="ot">&lt;-</span> <span class="fu">gen_class_bin2D</span>(<span class="at">n=</span><span class="dv">500</span>,<span class="at">graine=</span><span class="dv">12345</span>,<span class="at">bayes=</span><span class="fl">0.20</span>)<span class="sc">$</span>donnees</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>data_split <span class="ot">&lt;-</span> <span class="fu">initial_split</span>(spam, <span class="at">prop =</span> <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>spam.app <span class="ot">&lt;-</span> <span class="fu">training</span>(data_split)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>spam.test  <span class="ot">&lt;-</span> <span class="fu">testing</span>(data_split)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol type="1">
-<li><p>À l’aide de <strong>mc_cv</strong> séparer les données en 2 échantillons apprentissage/test avec 2/3 des données dans l’échantillon d’apprentissage.</p>
-<div class="cell" data-teacher="false">
-
-</div></li>
-<li><p>Afficher l’index des individus de l’échantillon d’apprentissage. Faire de même pour l’échantillon test.</p>
+<li><p>Entraîner une forêt aléatoire sur les données d’apprentissage uniquement en utilisant les paramètres par défaut de la fonction <strong>randomForest</strong>. Commenter.</p>
 <div class="cell" data-teacher="false">
 
 </div>
 <div class="corR">
-<p>Pour l’échantillon test, il suffit de considérer les individus qui ne sont pas dans l’échantillon d’apprentissage</p>
+<p>Il s’agit d’une forêt de classification avec 500 arbres. Le paramètre <code>mtry</code> vaut 7 et l’erreur OOB est de 4.72%.</p>
+</div></li>
+<li><p>Calculer les groupes prédits pour les individus de l’échantillon test et en déduire une estimation de l’erreur de classification.</p>
+<div class="cell" data-teacher="false">
+
+</div></li>
+<li><p>Calculer les estimations de la probabilité de spam pour les individus de l’échantillon test.</p>
+<div class="cell" data-teacher="false">
+
+</div></li>
+<li><p>Refaire les questions précédentes avec la fonction <strong>ranger</strong> du package <strong>ranger</strong> (voir <a href="https://arxiv.org/pdf/1508.04409.pdf" class="uri">https://arxiv.org/pdf/1508.04409.pdf</a>).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ranger)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-teacher="false">
+
+</div>
+<div class="corR">
+<p>Si on souhaite estimer les probabilités d’être (ou pas) spam, il faut le spécifier dans la construction de la forêt :</p>
 </div>
 <div class="cell" data-teacher="false">
 
 </div></li>
-<li><p>À l’aide de <strong>vfold_cv</strong> séparer les données en 10 blocs.</p>
+<li><p>Comparer les temps de calcul de <strong>randomForest</strong> et <strong>ranger</strong>.</p>
+<div class="cell" data-teacher="false" data-hash="07-forets_cache/html/unnamed-chunk-10_d70380b0ef02142651f45d7f31f992f1">
+
+</div>
+<div class="corR">
+<p><strong>ranger</strong> est beaucoup plus rapide.</p>
+</div></li>
+</ol>
+</div>
+<div id="exr-exo-choix-par-forets" class="theorem exercise">
+<p><span class="theorem-title"><strong>Exercice 7.3 (Sélection des paramètres) </strong></span>Nous nous intéressons ici au choix des paramètres de la forêt aléatoire.</p>
+<ol type="1">
+<li><p>Expliquer la sortie suivante.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(OOBCurve)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>foret1 <span class="ot">&lt;-</span> <span class="fu">ranger</span>(type<span class="sc">~</span>.,<span class="at">data=</span>spam,<span class="at">keep.inbag=</span><span class="cn">TRUE</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>spam.task <span class="ot">&lt;-</span> mlr<span class="sc">::</span><span class="fu">makeClassifTask</span>(<span class="at">data=</span>spam,<span class="at">target=</span><span class="st">"type"</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>erreurs <span class="ot">&lt;-</span> <span class="fu">OOBCurve</span>(foret1,<span class="at">measures =</span> <span class="fu">list</span>(mmce, auc),</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">task=</span>spam.task,<span class="at">data=</span>spam)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>erreurs1 <span class="ot">&lt;-</span> erreurs <span class="sc">|&gt;</span> <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">ntrees=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">500</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(ntrees<span class="sc">&gt;=</span><span class="dv">5</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>ntrees,<span class="at">names_to=</span><span class="st">"Erreur"</span>,<span class="at">values_to=</span><span class="st">"valeur"</span>)  </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(erreurs1)<span class="sc">+</span><span class="fu">aes</span>(<span class="at">x=</span>ntrees,<span class="at">y=</span>valeur)<span class="sc">+</span><span class="fu">geom_line</span>()<span class="sc">+</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>Erreur,<span class="at">scales=</span><span class="st">"free"</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="07-forets_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="corR">
+<p>Ce graphe permet de visualiser l’évolution des erreurs OOB (AUC et erreur de classification) en fonction du nombre d’arbres. Il peut être utilisé pour voir si l’algorithme a bien “convergé”. Si ce n’est pas le cas, il faut construire une forêt avec plus d’arbres.</p>
+</div></li>
+<li><p>Construire la forêt avec <code>mtry=1</code> et comparer ses performances avec celle construite précédemment.</p>
+<div class="cell" data-teacher="false" data-hash="07-forets_cache/html/foret2_af103ba33aae9404200d361561a07d43">
+
+</div>
+<div class="corR">
+<p>La forêt <code>foret1</code> est plus performante en terme d’erreur de classification OOB.</p>
+</div></li>
+<li><p>A l’aide des outils <code>tidymodels</code> sélectionner les paramètres <code>mtry</code> et <code>min_n</code> dans les grilles <code>c(1,6,seq(10,50,by=10),57)</code> et <code>c(1,5,100,500)</code>. On pourra notamment visualiser les critères en fonction des valeurs de paramètres.</p>
+<div class="corR">
+<p>On commence par construire la grille :</p>
+</div>
+<div class="cell" data-teacher="false">
+
+</div>
+<div class="corR">
+<p>On définit le workflow</p>
+</div>
+<div class="cell" data-teacher="false">
+
+</div>
+<div class="corR">
+<p>On effectue la validation croisée en parallélisant :</p>
+</div>
+<div class="cell">
+
+</div>
+<div class="cell">
+
+</div>
+<div class="cell">
+
+</div>
+<div class="corR">
+<p>On étudie les meilleures valeurs de paramètres pour les deux critères considérés :</p>
+</div>
+<div class="cell" data-teacher="false">
+
+</div>
+<div class="corR">
+<p>On visualise les erreurs de classification</p>
+</div>
+<div class="cell" data-teacher="false">
+
+</div>
+<div class="corR">
+<p>et les AUC</p>
+</div>
+<div class="cell" data-teacher="false">
+
+</div>
+<div class="corR">
+<p>On retrouve bien des petites valeurs pour <code>min_n</code> : il faut des arbres profonds pour que la forêt soit performante. Les valeurs optimales de <code>mtry</code> se situent autours de la valeur par défaut (7 ici). On peut donc conserver cette valeur pour ré-ajuster la forêt sur toutes les données :</p>
+</div>
 <div class="cell" data-teacher="false">
 
 </div></li>
-<li><p>Afficher l’index des individus qui se trouvent dans le bloc 4.</p>
+<li><p>Visualiser l’importance des variables pour les scores d’impureté et de permutations.</p>
 <div class="cell" data-teacher="false">
 
 </div></li>
 </ol>
 </div>
-<p>On considère la perte indicatrice : <span class="math inline">\(\ell(y,y^\prime)=\mathbf 1_{y\neq y^\prime}\)</span>, le risque d’un algorithme <span class="math inline">\(f\)</span> est donc <span class="math display">\[\mathcal R(f)=\mathbf E[\mathbf 1_{Y\neq f(X)}]=\mathbf P(Y\neq f(X)),\]</span> il est appelé <strong>probabilité d’erreur</strong> ou <strong>erreur de classification</strong>. On s’intéresse à l’estimation de ce risque par des méthodes de ré-échantillonnage pour l’algorithme des <span class="math inline">\(k\)</span> plus proches voisins.</p>
-<div id="exr-exo-prog-cv" class="theorem exercise">
-<p><span class="theorem-title"><strong>Exercice 2.2 (Progammation de validation hold out et validation croisée) </strong></span><br>
-</p>
-<ol type="1">
-<li><p>Créer une fonction qui admet en entrée</p>
+<div id="exr-exo-comp-arbre-foret-spam" class="theorem exercise">
+<p><span class="theorem-title"><strong>Exercice 7.4 (Arbre vs forêt aléatoire) </strong></span>Proposer et mettre en œuvre une procédure permettant de comparer les performances (courbes ROC, AUC et accuracy) d’un arbre CART utilisant la procédure d’élagage proposée dans la <a href="06-arbres.html#sec-elagage-cart"><span>Section&nbsp;6.2</span></a> avec une forêt aléatoire.</p>
+<div class="corR">
+<p>On peut envisager différentes stratégies pour répondre à cette question. Il convient de bien préciser ce que l’on souhaite faire. Il ne s’agit pas de sélectionner les paramètres d’un algorithme. On souhaite comparer deux algorithmes de prévision :</p>
 <ul>
-<li>un jeu de données</li>
-<li>une valeur de <code>k</code></li>
-<li>une séparation des données en apprentissage/test issue de <code>mc_cv</code></li>
+<li>un arbre CART qui utilise la procédure d’élagage CART : création de la suite optimale de sous arbre puis sélection d’un arbre dans cette suite en estimant l’erreur de classification par validation croisée ;</li>
+<li>une forêt aléatoire qui prend les valeurs par défaut pour <code>nodesize</code> et qui sélection <code>mtry</code> en minimisant l’erreur OOB (c’est un choix).</li>
 </ul>
-<p>et renvoie en sortie l’erreur de classification de la règle des <span class="math inline">\(k\)</span> plus proches voisins calculées sur l’échantillon test. On pourra la tester pour <code>k=3</code>.</p>
+<p>Il faut estimer les risques demandés en se donnant une stratégie de ré-échantillonnage. On choisit une validation croisée 10 blocs :</p>
+</div>
 <div class="cell" data-teacher="false">
 
-</div></li>
-<li><p>Refaire la question précédente avec une validation croisée K blocs.</p>
-<div class="cell" data-teacher="false">
-
-</div></li>
-<li><p>On considère la grille de valeurs de <code>k</code></p>
+</div>
+<div class="corR">
+<p>On crée une fonction spécifique à chaque algorithme qui calculera les prévisions de nouveaux individus :</p>
+</div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>grille.k <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Sélectionner dans cette grille une valeur de <span class="math inline">\(k\)</span> en minimisant l’erreur de classification calculée par validation hold out, puis par validation croisée 10 blocs. On pourra également visualiser les courbes de risque (erreur de classification en fonction du nombre de voisins).</p>
-<div class="corR">
-<p>Il suffit de calculer les erreurs pour chaque valeur de <code>k</code> avec une boucle</p>
-</div>
-<div class="cell" data-teacher="false" data-hash="02-est-risque_cache/html/unnamed-chunk-11_e0cf8d809f6ef061794eb701b9f5e517">
 
 </div>
-<div class="corR">
-<p>On peut les visualiser</p>
-</div>
-<div class="cell" data-teacher="false">
-
-</div>
-<div class="corR">
-<p>et en déduire les valeurs optimales</p>
-</div>
-<div class="cell" data-teacher="false">
-
-</div></li>
-</ol>
-</div>
-</section>
-<section id="le-package-tidymodels" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="le-package-tidymodels"><span class="header-section-number">2.2</span> Le package tidymodels</h2>
-<p>Il s’agit d’un meta-package qui regroupe plusieurs packages (<code>parsnip</code>, <code>recipes</code>, <code>rsample</code>…) qui utilisent une approche <em>tidy</em> pour <strong>sélectionner un algorithme de prévision</strong>. Il propose de créer un projet de travail, appelé <strong>workflow</strong>, permettant de construire un algorithme de prévision. Cette construction requiert tout un ensemble d’étapes comme la gestion des données manquantes, la création ou suppression de variables explicatives, la recherche de colinéarité parmi les variables explicatives, la sélection des paramètres de l’algorithme… Toutes ces étapes s’enchaînent en mettant à jour le workflow. Nous ne présentons pas toutes les fonctionnalités de <code>tidymodels</code>, on pourra les retrouver dans le tutoriel présentant le package à l’url <a href="https://www.tidymodels.org" class="uri">https://www.tidymodels.org</a>. Nous nous concentrons uniquement sur le choix de paramètres d’algorithmes de prévision à travers l’exemple des plus proches voisins.</p>
-<p>La première étape est consacrée à la définition de l’algorithme. Pour des plus proches voisins en classification on utilise</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>tune_spec <span class="ot">&lt;-</span> </span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nearest_neighbor</span>(<span class="at">neighbors=</span><span class="fu">tune</span>(),<span class="at">weight_func=</span><span class="st">"rectangular"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"classification"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) </span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Dans la fonction <code>nearest_neighbor</code> nous précisions que nous souhaitons utiliser le noyau <code>rectangular</code> comme nous l’avons fait jusqu’à présent. L’option <code>neighbors=tune()</code> spécifie que le nombre de plus proches voisins est un paramètre à calibrer. Plusieurs packages <code>R</code> permettent d’entraîner des <span class="math inline">\(k\)</span> plus proches voisins, on utilise <code>set_engine("kknn")</code> pour indiquer que l’on souhaite utiliser la fonction <code>kknn</code>. On pourra trouver l’ensemble des algorithmes disponibles dans <code>tidymodels</code> ainsi que les noms de leurs paramètres ici : <a href="https://www.tidymodels.org/find/parsnip/" class="uri">https://www.tidymodels.org/find/parsnip/</a>.</p>
-<p>On initialise le projet de travail dans la seconde étape en créant le <em>workflow</em> :</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ppv_wf <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">|&gt;</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_model</span>(tune_spec) <span class="sc">|&gt;</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_formula</span>(Y <span class="sc">~</span> .)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>On renseigne dans <code>add_model</code> les différentes informations sur l’algorithme des plus proches voisins et on indique dans <code>add_formula</code> la variable à expliquer et les variables explicatives. Nous avons vu dans la section précédente que la recherche du meilleur nombre de voisins s’effectue en estimant un risque de prévision sur une grille de valeurs candidates. On considère toujours des valeurs de <span class="math inline">\(k\)</span> variant entre 1 et 100 :</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>grille_k <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">neighbors=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Le choix de <span class="math inline">\(k\)</span> s’effectue avec la fonction <code>tune_grid</code> du package <code>tune</code> qui possède notamment les arguments suivants :</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tune_grid</span>(...,<span class="at">resamples=</span>...,<span class="at">grid=</span>...,<span class="at">metrics=</span>...)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>On indique dans :</p>
-<ul>
-<li><code>resamples</code> le ré-échantillonnage. Par exemple les échantillons d’apprentissage et test pour la validation hold out (avec la fonction <code>mc_cv</code>), les blocs pour la validation croisée (<code>vfolds_cv</code>), les tirages bootstraps (<code>bootstraps</code>) ;</li>
-<li><code>grid</code> la grille de paramètres candidats ;</li>
-<li><code>metrics</code> le risque de prévision (erreur quadratique, erreur de classification, <span class="math inline">\(\text{AUC}\)</span>…).</li>
-</ul>
-<div id="exr-exo-reech-tidymodels" class="theorem exercise">
-<p><span class="theorem-title"><strong>Exercice 2.3 (Validation hold out et validation croisée avec tidymodels) </strong></span><br>
-</p>
-<ol type="1">
-<li><p>Retrouver les erreurs par validation hold out en utilisant <code>tune_grid</code> et <code>collect_metrics</code>.</p>
-<div class="cell" data-teacher="false" data-hash="02-est-risque_cache/html/unnamed-chunk-18_8d226da8fbd426f9c964a2989551e349">
-
-</div></li>
-<li><p>Visualiser les meilleures valeurs de <code>k</code> à l’aide de <code>show_best</code></p>
-<div class="cell" data-teacher="false">
-
-</div></li>
-<li><p>Sélectionner la meilleur valeur de <code>k</code> avec <code>select_best</code>.</p>
-<div class="cell" data-teacher="false">
-
-</div></li>
-<li><p>Finaliser l’algorithme à l’aide de <code>finalize_workflow</code> et <code>fit</code>.</p>
-<div class="cell" data-teacher="false">
-
-</div></li>
-<li><p>Faire le même travail pour la validation croisée 10 blocs.</p>
-<div class="cell" data-teacher="false" type="corR">
-
-</div>
-<div class="cell" data-teacher="false" data-hash="02-est-risque_cache/html/unnamed-chunk-23_ac48ac25a26b346edde69e532dc7b8cc">
 
 </div>
 <div class="corR">
-<p>On obtient la valeur de <code>k</code> sélectionnée avec</p>
+<p>On effectue la validation croisée :</p>
 </div>
-<div class="cell" data-teacher="false">
-
-</div></li>
-</ol>
-</div>
-<div id="exr-exo-reech-tidymodels-auc" class="theorem exercise">
-<p><span class="theorem-title"><strong>Exercice 2.4 (Validation croisée pour l’AUC) </strong></span>Sélectionner la valeur de <span class="math inline">\(k\)</span> qui maximise l’AUC calculé par validation croisée 10 blocs.</p>
-<div class="cell" data-teacher="false" type="corR">
+<div class="cell">
 
 </div>
-<div class="cell" data-teacher="false" data-hash="02-est-risque_cache/html/unnamed-chunk-26_7885c7963e35772376697238254d7102">
+<div class="cell">
+
+</div>
+<div class="cell">
 
 </div>
 <div class="corR">
-<p>On a ajouté <code>control=control_resamples(save_pred = TRUE)</code> pour stocker les valeurs prédites et tracer les courbes ROC si besoin. La meilleur valeur de <span class="math inline">\(k\)</span> s’obtient toujours avec :</p>
+<p>On déduit la courbe ROC, l’AUC</p>
 </div>
 <div class="cell" data-teacher="false">
 
 </div>
 <div class="corR">
-<p>La courbe ROC pour la valeur sélectionnée s’obtient avec</p>
+<p>et l’accuracy</p>
 </div>
 <div class="cell" data-teacher="false">
 
@@ -541,7 +594,14 @@ div.correction {
 </div>
 
 
-</section>
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography" style="display: none">
+<div id="ref-bre01" class="csl-entry" role="doc-biblioentry">
+Breiman, L. 2001. <span>«&nbsp;Random forests&nbsp;»</span>. <em>Machine learning</em> 45: 5‑32.
+</div>
+<div id="ref-fri01" class="csl-entry" role="doc-biblioentry">
+Friedman, J. H. 2001. <span>«&nbsp;Greedy Function Approximation: A Gradient Boosting Machine&nbsp;»</span>. <em>Annals of Statistics</em> 29: 1189‑1232.
+</div>
+</div>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -794,13 +854,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./01-risque.html" class="pagination-link">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Calcul de risques avec R</span></span>
+      <a href="./06-arbres.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Méthodes CART</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./03-comp-risque.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Compléments</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./08-boosting.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Gradient boosting</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
