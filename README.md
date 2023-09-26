@@ -1,0 +1,1 @@
+Ce tutoriel présente quelques compléments et exercices sur le cours "Apprentissage supervisé" que l'on peut trouver à cette url : [https://lrouviere.github.io/page_perso/apprentissage_sup.html](https://lrouviere.github.io/page_perso/apprentissage_sup.html)

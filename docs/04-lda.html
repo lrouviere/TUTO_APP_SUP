@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Apprentissage supervisé avec R - 4&nbsp; Analyse discriminante linéaire</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./05-svm.html" rel="next">
+<link href="./03-comp-risque.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "Pas de résultats",
+    "search-matching-documents-text": "documents trouvés",
+    "search-copy-link-title": "Copier le lien vers la recherche",
+    "search-hide-matches-text": "Cacher les correspondances additionnelles",
+    "search-more-match-text": "correspondance de plus dans ce document",
+    "search-more-matches-text": "correspondances de plus dans ce document",
+    "search-clear-button-title": "Effacer",
+    "search-detached-cancel-button-title": "Annuler",
+    "search-submit-button-title": "Envoyer"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Apprentissage supervisé - Laurent Rouvière</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Recherche"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Basculer la navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+</ul>
+            <div class="quarto-navbar-tools tools-wide">
+    <div class="dropdown">
+      <a href="" title="Download" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download"><i class="bi bi-download"></i></a>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="./Apprentissage-supervisé-avec-R.pdf">
+              <i class="bi bi-bi-file-pdf pe-1"></i>
+            Download PDF
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="./Apprentissage-supervisé-avec-R.epub">
+              <i class="bi bi-bi-journal pe-1"></i>
+            Download ePub
+            </a>
+          </li>
+      </ul>
+    </div>
+    <div class="dropdown">
+      <a href="" title="Share" id="quarto-navigation-tool-dropdown-1" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Share"><i class="bi bi-share"></i></a>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="quarto-navigation-tool-dropdown-1">
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://twitter.com/intent/tweet?url=|url|">
+              <i class="bi bi-bi-twitter pe-1"></i>
+            Twitter
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
+              <i class="bi bi-bi-facebook pe-1"></i>
+            Facebook
+            </a>
+          </li>
+      </ul>
+    </div>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Basculer le mode sombre"><i class="bi"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Basculer en mode lecteur">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Basculer la barre latérale" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-lda.html">Algorithmes linéraires</a></li><li class="breadcrumb-item"><a href="./04-lda.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Analyse discriminante linéaire</span></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Basculer la barre latérale" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Recherche" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Recherche"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Présentation</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Notion de risque en apprentissage</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Basculer la section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-risque.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Calcul de risques avec R</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-est-risque.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Estimation du risque par ré-échantillonnage</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-comp-risque.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Compléments</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Algorithmes linéraires</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Basculer la section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-lda.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Analyse discriminante linéaire</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-svm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Support Vector Machine (SVM)</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">Arbres et agrégation d’arbres</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Basculer la section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-arbres.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Méthodes CART</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-forets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Forêts aléatoires</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-boosting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Gradient boosting</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">Autres</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Basculer la section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-deep.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Réseaux de neurones avec Keras</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-dondes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Données déséquilibrées</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-comp-algos.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Comparaison d’algorithmes</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Références</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table des matières</h2>
+   
+  <ul>
+  <li><a href="#prise-en-main-lda-et-qda-sur-les-iris-de-fisher" id="toc-prise-en-main-lda-et-qda-sur-les-iris-de-fisher" class="nav-link active" data-scroll-target="#prise-en-main-lda-et-qda-sur-les-iris-de-fisher"><span class="header-section-number">4.1</span> Prise en main : LDA et QDA sur les iris de Fisher</a></li>
+  <li><a href="#un-exemple-multi-classes" id="toc-un-exemple-multi-classes" class="nav-link" data-scroll-target="#un-exemple-multi-classes"><span class="header-section-number">4.2</span> Un exemple multi-classes</a></li>
+  <li><a href="#grande-dimension-reconnaissance-de-phonèmes" id="toc-grande-dimension-reconnaissance-de-phonèmes" class="nav-link" data-scroll-target="#grande-dimension-reconnaissance-de-phonèmes"><span class="header-section-number">4.3</span> Grande dimension : reconnaissance de phonèmes</a></li>
+  <li><a href="#exercices" id="toc-exercices" class="nav-link" data-scroll-target="#exercices"><span class="header-section-number">4.4</span> Exercices</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-lda" class="quarto-section-identifier"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Analyse discriminante linéaire</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="cell">
+
+</div>
+<style>
+div.correction {
+  color: black;
+  background-color: #F0F0F0;
+  font-style: normal;
+  border: 2px solid orange;
+  border-radius: 10px;
+  padding: 1em;
+  display: none;
+}
+
+.corR {
+  font-style: italic;
+  display: none;
+}
+
+.algo{
+  color: black;
+  background-color: #F9C4ED;
+  font-style: normal;
+}
+</style>
+<p>L’analyse discriminante linéaire est un algorithme de référence en classification supervisée. Il peut être appréhendé de deux façons complémentaires :</p>
+<ul>
+<li>une approche <strong>géométrique</strong> qui revient à chercher des hyperplans qui séparent au mieux les groupes ;</li>
+<li>une approche <strong>modèle</strong> qui fait l’hypothèse que les lois des covariables sont des vecteurs gaussiens avec des valeurs de paramètres différentes pour chaque groupe.</li>
+</ul>
+<p>On considère <span class="math inline">\((x_1,y_1),\dots,(x_n,y_n)\)</span> un échantillon où <span class="math inline">\(x_i\)</span> est à valeurs dans <span class="math inline">\(\mathbb R^d\)</span> et <span class="math inline">\(y_i\)</span> dans <span class="math inline">\(\{0,1\}\)</span>. L’approche <strong>géométrique</strong> revient à chercher une droite de <span class="math inline">\(\mathbb R^d\)</span> d’équation <span class="math inline">\(a_1x_1+\dots+a_dx_d=0\)</span> telle que :</p>
+<ul>
+<li>les centres de gravité de chaque groupe projeté sur cette droite soit au mieux séparé <span class="math inline">\(\Longrightarrow\)</span> maximiser la distance inter-classe.</li>
+<li>les observations projetés soient proches de leur centre de gravité projeté <span class="math inline">\(\Longrightarrow\)</span> minimiser la distance intra-classe.</li>
+</ul>
+<p>Le compromis entre ces deux distances s’obtient en maximisant le <strong>coefficient de Rayleigh</strong> qui est le quotient entre ces deux distance : <span class="math display">\[J(a)=\frac{B(a)}{W(a)}=\frac{a^tBa}{a^tWa}\]</span> où <span class="math inline">\(B\)</span> et <span class="math inline">\(W\)</span> sont les matrices inter et intra classes définies pas <span class="math display">\[B=\frac{1}{n}\sum_{k=1}^Kn_k(g_k-g)(g_k-g)^t\quad\text{et}\quad W=\frac{1}{n}\sum_{k=1}^Kn_kV_k\quad\text{avec}\quad V_k=\frac{1}{n_k}\sum_{i:Y_i=k}(X_i-g_k)(X_i-g_k)^t.\]</span></p>
+<p>Ici <span class="math inline">\(g\)</span> désigne le centre de gravité du nuage <span class="math inline">\(x_i,i=1,\dots,n\)</span> et <span class="math inline">\(g_k,k=0,1\)</span> les centres de gravité des deux groupes. La solution est donnée par un vecteur propre associé à la plus grande valeur propre de <span class="math inline">\(W^{-1}B\)</span>.</p>
+<p>L’approche <strong>modèle</strong> fait l’hypothèse que les vecteurs <span class="math inline">\(X|Y=k,k=0,1\)</span> sont des vecteurs gaussiens d’espérance <span class="math inline">\(\mu_k\in\mathbb R^d\)</span> et de matrice de variance covariance <span class="math inline">\(\Sigma\)</span>. Ces paramètres sont estimés par maximum de vraisemblance et on déduit les probabilités a posteriori par la <strong>formule de Bayes</strong> : <span class="math display">\[\mathbf P(Y=k|X=x)=\frac{\pi_kf_{X|Y=k}(x)}{f(x)}.\]</span> Le lien entre ces deux approches est établi dans l’exercice @ref(exr:exo-calcul-axes-lda). Nous proposons dans cette partie quelques exercices pour mettre en œuvre et analyser des analyses discriminantes avec <strong>R</strong>.</p>
+<section id="prise-en-main-lda-et-qda-sur-les-iris-de-fisher" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="prise-en-main-lda-et-qda-sur-les-iris-de-fisher"><span class="header-section-number">4.1</span> Prise en main : LDA et QDA sur les iris de Fisher</h2>
+<p>On considère les données sur les iris de Fisher.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(iris)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li><p>A l’aide de la fonction <strong>PCA</strong> du package <strong>FactoMineR</strong>, réaliser une ACP en utilisant comme variables actives les 4 variables quantitatives du jeu de données. On mettra la variable <code>Species</code> comme variable qualitative supplémentaire (option <code>quali.sup</code>).</p></li>
+<li><p>Représenter le nuage des individus sur les 2 premiers axes de l’ACP en utilisant une couleur différente pour chaque espèce d’iris (option <code>habillage</code>).</p></li>
+<li><p>A l’aide de la fonction <strong>lda</strong> du package <strong>MASS</strong>, effectuer une analyse discriminante linéaire permettant d’expliquer l’espèce par les 4 autres variables explicatives.</p></li>
+<li><p>Représenter le nuage des individus sur les deux premiers axes de l’analyse discriminante linéaire (en utilisant une couleur différente pour chaque espèce d’iris).</p></li>
+<li><p>Rappeler comment sont obtenues les coordonnées des individus sur chaque axe. En déduire une interprétation de la position des individus.</p>
+<div class="corR">
+<p>Les coodonnées se déduisent en projetant les observations sur les variables discriminantes. On peut récupérer ces dernières dans</p>
+</div>
+<div class="corR">
+<p>on déduit que l’axe 1 oppose les individus ayant des grosses Sépales (à droite) à ceux ayant des grosses pétales (à gauche).</p>
+</div></li>
+<li><p>Comparer les représentations des questions 2 et 4.</p>
+<div class="corR">
+<p>Pour le problème considéré, la représentation de la question 4 parait plus pertinente. C’est normal dans la mesure où elle prend en compte les groupes des individus pour construire les axes (contrairement à l’ACP).</p>
+</div></li>
+<li><p>Expliquer les sorties des commandes suivantes (<code>mod.lda</code> est l’objet construit avec la fonction <strong>lda</strong>).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>score <span class="ot">&lt;-</span> <span class="fu">predict</span>(mod.lda)<span class="sc">$</span>x</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ldahist</span>(score[,<span class="dv">1</span>],iris[,<span class="dv">5</span>])    </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ldahist</span>(score[,<span class="dv">2</span>],iris[,<span class="dv">5</span>])    </span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>Score contient les coordonnées des projections des individus sur les axes de l’analyse discriminante. On obtient ensuite les histogrammes correspondants aux distributions des coordonnées pour chaque groupe. On visualise clairement que le premier axe est très discriminant. C’est renforcé par la sortie :</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="an">Proportion of trace:</span><span class="co"> LD1 LD2 0.9912 0.0088</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>qui restitue, en proportion, la valeur du coefficient de Rayleigh de chaque axe discriminant.</p>
+</div></li>
+<li><p>Exécuter et analyser les sorties de la commande</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>mod.lda2 <span class="ot">&lt;-</span> <span class="fu">lda</span>(Species<span class="sc">~</span>.,<span class="at">data=</span>iris,<span class="at">CV=</span><span class="cn">TRUE</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>Une validation croisée est ici effectuée pour prédire les probabilités a posteriori ainsi que les groupes de chaque observation. On peut obtenir ces prévisions avec</p>
+</div></li>
+<li><p>Comparer, en terme d’erreur de prévision, les performances de LDA et QDA.</p>
+<div class="corR">
+<p>Il suffit de confronter les valeurs prédites aux valeurs observées :</p>
+</div>
+<div class="corR">
+<p>On peut retrouver ces résultats avec du <strong>dplyr</strong> :</p>
+</div></li>
+</ol>
+</section>
+<section id="un-exemple-multi-classes" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="un-exemple-multi-classes"><span class="header-section-number">4.2</span> Un exemple multi-classes</h2>
+<p>On considère les jeux de données <strong>Vowel</strong> (training et test) qui se trouvent à cet <a href="https://statweb.stanford.edu/~hastie/ElemStatLearn/">url</a>. On peut les importer avec</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>dapp <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"https://web.stanford.edu/~hastie/ElemStatLearn/datasets/vowel.train"</span>)[,<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>dtest <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"https://web.stanford.edu/~hastie/ElemStatLearn/datasets/vowel.test"</span>)[,<span class="sc">-</span><span class="dv">1</span>]</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li><p>Expliquer le problème.</p>
+<div class="corR">
+<p>Il s’agit d’expliquer la variable <code>y</code> qui admet 11 modalités par les 9 autres variables qui sont toutes quantitatives. On transforme donc la variable cible en facteur :</p>
+</div></li>
+<li><p>Effectuer une analyse discriminante linéaire (uniquement avec les données d’apprentissage) et visualiser les individus sur les 2 premiers axes de l’analyse discriminante. On pourra utiliser <strong>predict</strong>.</p>
+<div class="corR">
+<p>Il faut ici récupérer les coordonnées des individus sur chaque axe :</p>
+</div>
+<div class="corR">
+<p>On peut ainsi obtenir le graphe demandé.</p>
+</div></li>
+<li><p>La fonction suivante permet de choisir les axes à visualiser, ainsi que les centres de gravité projetés des groupes.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>repres_axes <span class="ot">&lt;-</span> <span class="cf">function</span>(prev,cdg,<span class="at">axe1=</span><span class="dv">1</span>,<span class="at">axe2=</span><span class="dv">2</span>){</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  cdg <span class="ot">&lt;-</span> prev <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(y) <span class="sc">%&gt;%</span> <span class="fu">summarise_all</span>(mean)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  nom1 <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"LD"</span>,<span class="fu">as.character</span>(axe1),<span class="at">sep=</span><span class="st">""</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  nom2 <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"LD"</span>,<span class="fu">as.character</span>(axe2),<span class="at">sep=</span><span class="st">""</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(prev)<span class="sc">+</span><span class="fu">aes_string</span>(<span class="at">x=</span><span class="fu">as.name</span>(nom1),<span class="at">y=</span><span class="fu">as.name</span>(nom2))<span class="sc">+</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color=</span>y))<span class="sc">+</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>(<span class="at">data=</span>cdg,<span class="fu">aes</span>(<span class="at">color=</span>y),<span class="at">shape=</span><span class="dv">17</span>,<span class="at">size=</span><span class="dv">4</span>)<span class="sc">+</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_classic</span>()</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Étudier la pertinence des axes.</p>
+<div class="corR">
+<p>Les groupes sont mieux séparés sur les premiers axes de l’analyse, ce qui est logique. On peut le vérifier en étudiant la sortie <strong>Proportion of trace</strong> de la fonction <strong>lda</strong> que l’on peut retrouver avec</p>
+</div></li>
+<li><p>Représenter les individus sur le premier plan factoriel de l’ACP, on utilisera une couleur différente pour chaque groupe. On pourra utiliser le package <strong>FactoMineR</strong>.</p></li>
+<li><p>Comparer cette projection avec celle obtenue par l’analyse discriminante linéaire.</p>
+<div class="corR">
+<p>La projection de l’ACP semble moins séparer les groupes que l’analyse discriminante. Ca parait logique puisque l’ACP ne prend pas en compte les groupes pour construire ses axes.</p>
+</div></li>
+<li><p>Évaluer la performance de la <strong>lda</strong> sur les données test. Comparer avec l’analyse discriminante quadratique.</p>
+<div class="corR">
+<p>QDA est légèrement plus performante pour le critère étudié.</p>
+</div></li>
+<li><p>Expliquer comment on peut faire de la prévision en réduisant la dimension de l’espace des <span class="math inline">\(X\)</span>.</p>
+<div class="corR">
+<p>Au lieu de projeter sur tous les axes, on considère uniquement les projections sur les <span class="math inline">\(k\)</span> premiers axes de l’analyse discriminante. Cela permet de réduire la dimension et (éventuellement) de supprimer du bruit (qui se retrouve souvent sur les derniers axes). Cette métode s’appelle <strong>Reduced-rank discriminant analysis</strong></p>
+</div></li>
+<li><p>Proposer une méthode permettant de choisir le meilleur nombre d’axes. On pourra notamment utiliser l’option <code>dimen</code> de la fonction <strong>predict.lda</strong>.</p>
+<div class="corR">
+<p>Cette option permet en effet d’utiliser uniquement les premiers axes de l’analyse discriminante. On peut ainsi estimer la probabilité d’erreur en fonction de la dimension de l’espace sur lequel on projette :</p>
+</div>
+<div class="corR">
+<p>On remarque que l’erreur est minimale en projetant uniquement sur les deux premiers axes. Cette erreur est de plus comparable avec celle obtenue pour <strong>QDA</strong>.</p>
+</div></li>
+</ol>
+</section>
+<section id="grande-dimension-reconnaissance-de-phonèmes" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="grande-dimension-reconnaissance-de-phonèmes"><span class="header-section-number">4.3</span> Grande dimension : reconnaissance de phonèmes</h2>
+<p>On considère le jeu de données <strong>phoneme</strong> téléchargeable à l’url <a href="https://github.com/cran/ElemStatLearn/blob/master/data/phoneme.RData" class="uri">https://github.com/cran/ElemStatLearn/blob/master/data/phoneme.RData</a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">'data/phoneme.RData'</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(phoneme)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>donnees <span class="ot">&lt;-</span> phoneme[,<span class="sc">-</span><span class="fu">c</span>(<span class="dv">258</span>)]</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li><p>Expliquer le problème et représenter pour chaque groupe la courbe moyenne.</p>
+<div class="corR">
+<p>Il s’agit d’expliquer un son parmi 5 à partir de courbes discrétisées en 256 points. On peut tracer la courbe moyenne pour chaque groupe avec :</p>
+</div></li>
+<li><p>Séparer les données en un échantillon d’apprentissage de taille 3000 et un échantillon test de taille 1509.</p></li>
+<li><p>Effectuer une analyse discriminante linéaire et une analyse discriminante quadratique sur les données d’apprentissage uniquement. Évaluer les performances de ces deux approches sur les données test.</p>
+<div class="corR">
+<p>On calcule tout d’abord <strong>lda</strong> et <strong>qda</strong> sur les données d’apprentissage :</p>
+</div>
+<div class="corR">
+<p>On prédit les individus de l’échantillon test pour en déduire l’erreur :</p>
+</div></li>
+<li><p>Quels peuvent être les intérêts d’effectuer une analyse discriminante régularisée dans ce contexte ? Effectuer une telle analyse à l’aide de la fonction <strong>rda</strong> du package <strong>klaR</strong>.</p>
+<div class="corR">
+<p>Le nombre de variables est élevé, par conséquent on se retrouve avec beaucoup de paramètres à estimer. De plus, les données étant fonctionnelles, on a de la corrélation entre les les variables explicatives (ce qui est rarement bon pour bien estimer). On fait la <strong>rda</strong> sur les données d’apprentissage :</p>
+</div>
+<div class="corR">
+<p>On prédit le test et on compare avec les autres modèles :</p>
+</div></li>
+<li><p>Sélectionner les paramètres de régularisation à l’aide du package <strong>caret</strong>. Comparer le nouveau modèle aux précédents.</p>
+<div class="corR">
+<p>On définit deux grilles de longueur 5 pour les paramètres <code>lambda</code> et <code>gamma</code>, et on fait une validation croisée 5 blocs pour sélectionner les paramètres. On parallélise sur 4 cœurs pour réduire le temps de calcul.</p>
+</div>
+<div class="corR">
+<p>On évalue et compare les performances :</p>
+</div>
+<div class="corR">
+<p>La régularisation a permis d’améliorer les performances.</p>
+</div></li>
+</ol>
+</section>
+<section id="exercices" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="exercices"><span class="header-section-number">4.4</span> Exercices</h2>
+<div id="exr-exo-evm-lda" class="theorem exercise">
+<p><span class="theorem-title"><strong>Exercice 4.1 (MV pour LDA) </strong></span>On cherche à expliquer une variable aléatoire <span class="math inline">\(Y\)</span> à valeurs dans <span class="math inline">\(\{0,1\}\)</span> par une variable aléatoire <span class="math inline">\(X\)</span> à valeurs dans <span class="math inline">\(\mathbb R\)</span>.</p>
+<ol type="1">
+<li><p>Quels sont les paramètres à estimer dans le modèle d’analyse discriminante linéaire.</p>
+<div class="correction">
+<p>Le modèle <strong>LDA</strong> suppose que <span class="math inline">\(X|Y=k\sim\mathcal N(\mu_k,\sigma^2)\)</span>. Il faut donc estimer <span class="math inline">\(\mu_0,\mu_1,\sigma^2\)</span> et les probabilités <span class="math inline">\(\pi_k=\mathbf P(Y=k),j=0,1\)</span>.</p>
+</div></li>
+<li><p>Calculer la vraisemblance conditionnelle à <span class="math inline">\(Y\)</span> et en déduire les estimateurs des paramètres des lois gaussiennes.</p>
+<div class="correction">
+<p>On désigne par <span class="math inline">\(\mathcal I_k,k=0,1\)</span> les indices des observations dans le groupe <span class="math inline">\(k\)</span>. On a alors <span class="math display">\[L_{X|Y}(x_1,\dots,x_n)=\prod_{i\in\mathcal I_0}f_0(x_i) \prod_{i\in\mathcal I_1}f_1(x_i).\]</span> On obtient ainsi</p>
+<p><span class="math display">\[
+  \begin{aligned}
+  \mathcal L_{X|Y}(x_1,\dots,x_n)=- &amp; (n_0+n_1)\log(\sqrt{2\pi})-(n_0+n_1)\log \sqrt{\sigma^2} \\
+  -&amp;\frac{1}{2}\sum_{i\in\mathcal I_0}
+  \frac{(x_i-\mu_0)^2}{\sigma^2}-
+  \frac{1}{2}\sum_{i\in\mathcal I_1}
+  \frac{(x_i-\mu_1)^2}{\sigma^2}.
+\end{aligned}
+\]</span></p>
+<p>En dérivant par rapport à <span class="math inline">\(\mu_0\)</span> et <span class="math inline">\(\mu_1\)</span> il est facile de voir que les EMV de ces paramètres sont donnés par</p>
+<p><span class="math display">\[\widehat\mu_0=\frac{1}{n_0}\sum_{i\in\mathcal
+I_0}x_i\quad\text{et}\quad
+\widehat\mu_1=\frac{1}{n_1}\sum_{i\in\mathcal I_1}x_i.\]</span></p>
+<p>On dérive maintenant par rapport à <span class="math inline">\(\sigma^2\)</span> :</p>
+<p><span class="math display">\[\frac{\partial\mathcal L_{X|Y}(x_1,\dots,x_n)}{\partial\sigma^2}=-\frac{n_0+n_1}{\sigma^2}+\sum_{i\in\mathcal I_0}\frac{(x_i-\mu_0)^2}{2\sigma^4}+\sum_{i\in\mathcal I_1}\frac{(x_i-\mu_1)^2}{2\sigma^4}.\]</span></p>
+<p>On déduit que l’EMV de <span class="math inline">\(\sigma^2\)</span> est donné par</p>
+<p><span class="math display">\[\widehat\sigma^2=\frac{1}{n}\left(\sum_{i\in\mathcal I_0}(x_i-\widehat\mu_0)^2+\sum_{i\in\mathcal I_1}(x_i-\widehat\mu_1)^2\right).\]</span></p>
+</div></li>
+<li><p>Comparer les estimateurs obtenus avec ceux du cours.</p>
+<div class="correction">
+<p>Ces estimateurs correspondent à ceux proposés dans le cours, à part pour <span class="math inline">\(\widehat\sigma^2\)</span> où on divise par <span class="math inline">\(n-2\)</span> au lieu de <span class="math inline">\(n\)</span> pour débiaiser.</p>
+</div></li>
+</ol>
+</div>
+<div id="exr-exo-fondiscri-lda" class="theorem exercise">
+<p><span class="theorem-title"><strong>Exercice 4.2 (Fonctions linéaires discriminantes) </strong></span>On cherche à expliquer une variable aléatoire <span class="math inline">\(Y\)</span> à valeurs dans <span class="math inline">\(\{0,1\}\)</span> par une variable aléatoire <span class="math inline">\(X\)</span> à valeurs dans <span class="math inline">\(\mathbb R^p\)</span>.</p>
+<ol type="1">
+<li><p>Rappeler le modèle d’analyse discriminante linéaire.</p>
+<div class="correction">
+<p>Le modèle <strong>LDA</strong> fait l’hypothèse que <span class="math inline">\(X|Y=k\)</span> est un vecteur gaussien de loi <span class="math inline">\(\mathcal N(\mu_k,\Sigma)\)</span> avec <span class="math inline">\(\mu_k\in\mathbb R^p\)</span> et <span class="math inline">\(\Sigma\)</span> matrice symétrique définie positive <span class="math inline">\(p\times p\)</span>.</p>
+</div></li>
+<li><p>Soit <span class="math inline">\(x\in\mathbb R^p\)</span> un nouvel individu. Montrer que la règle qui consiste à affecter <span class="math inline">\(x\)</span> dans le groupe qui maximise <span class="math inline">\(\mathbf P(Y=k|X=x)\)</span> est équivalente à la règle qui consiste à affecter <span class="math inline">\(x\)</span> dans le groupe qui maximise les fonctions linéaires discriminantes (on prendra soin de rappeler la définition des fonctions linéaires discriminantes).</p>
+<div class="correction">
+<p>Sous le modèle LDA, maximiser <span class="math inline">\(\mathbf P(Y=k|X=x)\)</span> est équivalent à maximiser <span class="math inline">\(\pi_kf_k(x)\)</span> où <span class="math inline">\(f_k(x)\)</span> est la densité d’un vecteur gaussien <span class="math inline">\(\mathcal N(\mu_k,\Sigma)\)</span>. Par conséquent cela revient à maximiser <span class="math display">\[-\frac{1}{2}(x-\mu_k)^t\Sigma^{-1}(x-\mu_k)+\log(\pi_k),\]</span> ou encore à chercher la fonction linéaire discriminante <span class="math display">\[\delta_k(x)=x^t\Sigma^{-1}\mu_k-\frac{1}{2}\mu_k^t\Sigma^{-1}\mu_k+\log\pi_k.\]</span> qui prend la plus grande valeur.</p>
+</div></li>
+</ol>
+</div>
+<div id="exr-exo-calcul-axes-lda" class="theorem exercise">
+<p><span class="theorem-title"><strong>Exercice 4.3 (Approche géométrique de la LDA) </strong></span>On considère un <span class="math inline">\(n\)</span>-échantillon i.i.d. <span class="math inline">\((x_1,y_1),\dots,(x_n,y_n)\)</span> où <span class="math inline">\(x_i\)</span> est à valeurs dans <span class="math inline">\(\mathbb R^2\)</span> et <span class="math inline">\(y_i\)</span> dans <span class="math inline">\(\{0,1\}\)</span>. On cherche une droite vectorielle <span class="math inline">\(a\)</span> telle que les projections de chaque groupe sur <span class="math inline">\(a\)</span> soient séparées “au mieux”. Dit autrement, on cherche <span class="math inline">\(a\)</span> telle que</p>
+<ul>
+<li>la distance entre les centres de gravité <span class="math display">\[g_0=\frac{1}{\mbox{card}\{i:y_i=0\}}\sum_{i:y_i=0}x_i\quad\textrm{et}\quad g_1=\frac{1}{\mbox{card}\{i:y_i=1\}}\sum_{i:y_i=1}x_i\]</span> projetés sur <span class="math inline">\(a\)</span> soit maximale (cette distance est appelée distance interclasse) ;</li>
+<li>la distance entre les projections des individus et leur centre de gravité soit minimale (distance interclasse).</li>
+</ul>
+<p>Pour un vecteur <span class="math inline">\(u\)</span> de <span class="math inline">\(\mathbb R^2\)</span>, on désigne par <span class="math inline">\(\pi_a(u)\)</span> son projeté sur la droite engendrée par <span class="math inline">\(a\)</span>. Sans perte de généralité on supposera dans un premier temps que <span class="math inline">\(a\)</span> est de norme 1.</p>
+<ol type="1">
+<li><p>Rappeler les définitions des variances totale <span class="math inline">\(V\)</span>, intra <span class="math inline">\(W\)</span> et inter <span class="math inline">\(B\)</span> des observations <span class="math inline">\((x_1,y_1),\dots,(x_n,y_n)\)</span>.</p>
+<div class="correction">
+<p>On a <span class="math display">\[V=\frac{1}{n}\sum_{i=1}^n(x_i-g)(x_i-g)^t,\ B=\frac{1}{n}\sum_{k=1}^Kn_k(g_k-g)(g_k-g)^t,\]</span> <span class="math display">\[W=\frac{1}{n}\sum_{k=1}^K\sum_{i:y_i=k}(x_i-g_k)(x_i-g_k)^t.\]</span></p>
+</div></li>
+<li><p>Pour <span class="math inline">\(u\)</span> fixé dans <span class="math inline">\(\mathbb R^2\)</span>, exprimer <span class="math inline">\(\pi_a(u)\)</span> en fonction de <span class="math inline">\(u\)</span> et <span class="math inline">\(a\)</span> et en déduire que <span class="math inline">\(\|\pi_a(u)\|^2=a^tuu^ta\)</span>.</p>
+<div class="correction">
+<p>On a <span class="math display">\[\pi_a(u)=\frac{\langle u,a\rangle}{\|a\|^2}a=u^ta a\quad\text{ si }\quad\|a\|=1.\]</span> On déduit <span class="math inline">\(\|\pi_a(u)\|^2=a^tuu^ta\)</span>.</p>
+</div></li>
+<li><p>Exprimer les variances totale <span class="math inline">\(V(a)\)</span>, intra <span class="math inline">\(W(a)\)</span> et inter <span class="math inline">\(B(a)\)</span> projetées sur <span class="math inline">\(a\)</span> en fonction des variances calculées à la question 1.</p>
+<div class="correction">
+<p>On a ainsi <span class="math display">\[V(a)=\frac{1}{n}\sum_{i=1}^n\|\pi_a(x_i-g)\|^2=\frac{1}{n}\sum_{i=1}^na^t(x_i-g)^t(x_i-g)a=a^tVa.\]</span> On montre de même que <span class="math inline">\(B(a)=a^tBa\)</span> et <span class="math inline">\(W(a)=a^tWa\)</span>.</p>
+</div></li>
+<li><p>On cherche maintenant à maximiser</p>
+<p><span class="math display">\[J(a)=\frac{B(a)}{W(a)}\]</span></p>
+<p>ou encore à</p>
+<p><span id="eq-eq:pbmaxrayleigh"><span class="math display">\[
+\textrm{maximiser }B(a)\quad\textrm{sous la contrainte}\quad W(a)=1.
+\tag{4.1}\]</span></span></p>
+<p>La méthode des multiplicateurs de Lagrange permet de résoudre un tel problème. La solution du problème de maximisation d’une fonction <span class="math inline">\(f(x)\)</span> sujette à <span class="math inline">\(h(x)=0\)</span> s’obtient en résolvant l’équation</p>
+<p><span class="math display">\[\frac{\partial L(x,\lambda)}{\partial x}=0,\quad\textrm{où}\quad L(x,\lambda)=f(x)+\lambda h(x).\]</span></p>
+<ol type="a">
+<li><p>Montrer que la solution du problème <a href="#eq-eq:pbmaxrayleigh">équation&nbsp;<span>4.1</span></a> est un vecteur propre de <span class="math inline">\(W^{-1}B\)</span> associé à la plus grande valeur propre de <span class="math inline">\(W^{-1}B\)</span>. On note <span class="math inline">\(a^\star\)</span> cette solution.</p>
+<div class="correction">
+<p>On écrit le Lagrangien <span class="math display">\[L(a,\lambda)=B(a)+\lambda W(a)=a^t(B+\lambda W)a,\]</span> puis on le dérive par rapport à <span class="math inline">\(a\)</span> : <span class="math display">\[\frac{\partial L(a,\lambda)}{\partial a}=2(B+\lambda W)a.\]</span> Par conséquent la solution <span class="math inline">\(a^\star\)</span> vérifie <span class="math inline">\(W^{-1}Ba^\star=\lambda a^\star\)</span>, c’est donc un vecteur propre de <span class="math inline">\(W^{-1}B\)</span>. De plus, il est facile de voir que <span class="math inline">\(J(a^\star)=\lambda\)</span>, par conséquent <span class="math inline">\(a^\star\)</span> est un vecteur propre associé à la plus grande valeur propre de <span class="math inline">\(W^{-1}B\)</span>.</p>
+</div></li>
+<li><p>Montrer que <span class="math inline">\(a^\star\)</span> est colinéaire à <span class="math inline">\(W^{-1}(g_1-g_0)\)</span>. On pourra admettre que, dans le cas de 2 groupes, on a <span class="math display">\[B=\frac{n_0n_1}{n^2}(g_1-g_0)(g_1-g_0)^t.\]</span></p>
+<div class="correction">
+<p><span class="math inline">\(W^{-1}B\)</span> possédant au plus une valeur propre non nulle, il suffit de vérifier que <span class="math inline">\(W^{-1}(g_1-g_0)\)</span> est vecteur propre de <span class="math inline">\(W^{-1}B\)</span>. On a <span class="math display">\[W^{-1}B W^{-1}(g_1-g_0)=\frac{n_0n_1}{n^2} W^{-1}(g_1-g_0)(g_1-g_0)^t W^{-1}(g_1-g_0)=\lambda W^{-1}(g_1-g_0)\]</span> avec <span class="math display">\[\lambda=\frac{n_0n_1}{n^2}(g_1-g_0)^t W^{-1}(g_1-g_0).\]</span></p>
+</div></li>
+<li><p>On considère la règle géométrique d’affectation qui consiste à classer un nouvel individu <span class="math inline">\(x\in\mathbb R^p\)</span> au groupe 1 si son projeté sur <span class="math inline">\(a^\star\)</span> est plus proche de <span class="math inline">\(\pi_{a^\star}(g_1)\)</span> que de <span class="math inline">\(\pi_{a^\star}(g_0)\)</span>. Montrer que <span class="math inline">\(x\)</span> sera affecté au groupe 1 si <span class="math display">\[S(x)=x^tW^{-1}(g_1-g_0)&gt;s\]</span> où on exprimera <span class="math inline">\(s\)</span> en fonction de <span class="math inline">\(g_0\)</span>, <span class="math inline">\(g_1\)</span> et <span class="math inline">\(W\)</span>.</p>
+<div class="correction">
+<p>Le nouvel <span class="math inline">\(x\)</span> est affecté au groupe <span class="math inline">\(1\)</span> si <span class="math inline">\(\|\pi_{a^\star}(x-g_1)\|\leq \|\pi_{a^\star}(x-g_0)\|\)</span>. Or <span class="math display">\[\pi_{a^\star}(x-g_1)=\frac{(x-g_1)^ta_1^\star}{\|a_1^\star\|^2} a_1^\star\quad\text{et}\quad \pi_{a^\star}(x-g_0)=\frac{(x-g_0)^ta_1^\star}{\|a_1^\star\|^2} a_1^\star\]</span> où <span class="math inline">\(a_1^\star=W^{-1}(g_1-g_0)\)</span>. Par conséquent, <span class="math inline">\(x\)</span> est affecté au groupe 1 si <span class="math display">\[((x-g_1)^ta_1^\star)^2\leq ((x-g_0)^ta_1^\star)^2\Longleftrightarrow -2x^ta_1^\star\times g_1^ta_1^\star+(g_1^ta_1^\star)^2\leq -2x^ta_1^\star\times g_0^ta_1^\star+(g_0^ta_1^\star)^2\]</span> ou encore <span class="math display">\[2x^ta_1^\star(g_0^ta_1^\star-g_1^ta_1^\star)\leq (g_0^ta_1^\star)^2-(g_1^ta_1^\star)^2=(g_0^ta_1^\star+g_1^ta_1^\star)(g_0^ta_1^\star-g_1^ta_1^\star).\]</span> Comme <span class="math inline">\(g_0^ta_1^\star-g_1^ta_1^\star=-(g_1-g_0)^tW^{-1}(g_1-g_0)\leq 0\)</span> on déduit que <span class="math inline">\(x\)</span> est affecté au groupe 1 si <span class="math display">\[2x^ta_1^\star\geq g_0^ta_1^\star+g_1^ta_1^\star \Longleftrightarrow x^tW^{-1}(g_1-g_0)\geq \frac{1}{2}(g_1+g_0)^tW^{-1}(g_1-g_0).\]</span></p>
+</div></li>
+<li><p>Montrer que cette règle est équivalente à choisir le groupe qui minimise la distance de Mahalanobis <span class="math display">\[d(x,g_k)=(x-g_k)^tW^{-1}(x-g_k),\quad k=0,1.\]</span></p>
+<div class="correction">
+<p>Il est facile de voir que <span class="math inline">\(d(x,g_1)\leq d(x,g_0)\)</span> si et seulement si <span class="math display">\[x^tW^{-1}g_1-\frac{1}{2}g_1^tW^{-1}g_1\leq x^tW^{-1}g_0-\frac{1}{2}g_0^tW^{-1}g_0.\]</span> D’où le résultat.</p>
+</div></li>
+<li><p>On revient maintenant à l’approche probabiliste de l’analyse discriminante linéaire vue en cours et on considère la règle d’affectation qui consiste à décider “groupe 1’’ si <span class="math inline">\(\mathbf P(Y=1|X=x)\geq 0.5\)</span>. Montrer que dans ce cas, un nouvel individu <span class="math inline">\(x\)</span> est affecter au groupe 1 si :</p>
+<p><span class="math display">\[
+S(x)=x^t\Sigma^{-1}(\mu_1-\mu_0)&gt;\frac{1}{2}(\mu_1+\mu_0)^t\Sigma^{-1}(\mu_1-\mu_0)-\log\left(\frac{\pi_1}{\pi_0}\right).
+\]</span></p>
+<p>Conclure.</p>
+<div class="correction">
+<p>Si on se place dans le modèle Gaussien d’analyse discriminante linéaire, <span class="math inline">\(x\)</span> est affecté au groupe 1 si <span class="math inline">\(\mathbf P(Y=1|X=x)\geq\mathbf P(Y=0|X=x)\)</span>, c’est-à-dire</p>
+<p><span class="math display">\[
+\log(\pi_1)-\frac{1}{2}(x-\mu_1)^t\Sigma^{-1}(x-\mu_1)\geq \log(\pi_0)-\frac{1}{2}(x-\mu_0)^t\Sigma^{-1}(x-\mu_0),
+\]</span></p>
+<p>ou encore</p>
+<p><span class="math display">\[
+x^t\Sigma^{-1}(\mu_1-\mu_0)\geq \frac{1}{2}(\mu_1+\mu_0)^t\Sigma^{-1}(\mu_1-\mu_0)+\log \frac{\pi_0}{\pi_1}.
+\]</span></p>
+<p>On conclut en remarquant que si</p>
+<ul>
+<li><span class="math inline">\(\mu_0\)</span> et <span class="math inline">\(\mu_1\)</span> sont estimés par <span class="math inline">\(g_0\)</span> et <span class="math inline">\(g_1\)</span> (ce qui est le cas généralement) ;</li>
+<li><span class="math inline">\(\Sigma\)</span> est, à une constante multiplicative près, estimé par <span class="math inline">\(W\)</span> (ce qui est le cas généralement) ;</li>
+<li>les probabilités a priori <span class="math inline">\(\pi_0\)</span> et <span class="math inline">\(\pi_1\)</span> sont égales,</li>
+</ul>
+<p>alors les 2 règles coïncident.</p>
+</div></li>
+</ol></li>
+</ol>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  let localAlternateSentinel = 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copié");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copié");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./03-comp-risque.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Compléments</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./05-svm.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Support Vector Machine (SVM)</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

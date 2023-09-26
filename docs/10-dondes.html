@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Apprentissage supervisé avec R - 10&nbsp; Données déséquilibrées</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./11-comp-algos.html" rel="next">
+<link href="./09-deep.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "Pas de résultats",
+    "search-matching-documents-text": "documents trouvés",
+    "search-copy-link-title": "Copier le lien vers la recherche",
+    "search-hide-matches-text": "Cacher les correspondances additionnelles",
+    "search-more-match-text": "correspondance de plus dans ce document",
+    "search-more-matches-text": "correspondances de plus dans ce document",
+    "search-clear-button-title": "Effacer",
+    "search-detached-cancel-button-title": "Annuler",
+    "search-submit-button-title": "Envoyer"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Apprentissage supervisé - Laurent Rouvière</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Recherche"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Basculer la navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+</ul>
+            <div class="quarto-navbar-tools tools-wide">
+    <div class="dropdown">
+      <a href="" title="Download" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download"><i class="bi bi-download"></i></a>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="./Apprentissage-supervisé-avec-R.pdf">
+              <i class="bi bi-bi-file-pdf pe-1"></i>
+            Download PDF
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="./Apprentissage-supervisé-avec-R.epub">
+              <i class="bi bi-bi-journal pe-1"></i>
+            Download ePub
+            </a>
+          </li>
+      </ul>
+    </div>
+    <div class="dropdown">
+      <a href="" title="Share" id="quarto-navigation-tool-dropdown-1" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Share"><i class="bi bi-share"></i></a>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="quarto-navigation-tool-dropdown-1">
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://twitter.com/intent/tweet?url=|url|">
+              <i class="bi bi-bi-twitter pe-1"></i>
+            Twitter
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
+              <i class="bi bi-bi-facebook pe-1"></i>
+            Facebook
+            </a>
+          </li>
+      </ul>
+    </div>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Basculer le mode sombre"><i class="bi"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Basculer en mode lecteur">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Basculer la barre latérale" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./09-deep.html">Autres</a></li><li class="breadcrumb-item"><a href="./10-dondes.html"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Données déséquilibrées</span></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Basculer la barre latérale" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Recherche" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Recherche"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Présentation</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Notion de risque en apprentissage</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Basculer la section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-risque.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Calcul de risques avec R</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-est-risque.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Estimation du risque par ré-échantillonnage</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-comp-risque.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Compléments</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Algorithmes linéraires</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Basculer la section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-lda.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Analyse discriminante linéaire</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-svm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Support Vector Machine (SVM)</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">Arbres et agrégation d’arbres</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Basculer la section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-arbres.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Méthodes CART</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-forets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Forêts aléatoires</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-boosting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Gradient boosting</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">Autres</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Basculer la section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-deep.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Réseaux de neurones avec Keras</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-dondes.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Données déséquilibrées</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-comp-algos.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Comparaison d’algorithmes</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Références</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table des matières</h2>
+   
+  <ul>
+  <li><a href="#critères-de-performance-pour-données-déséquilibrées" id="toc-critères-de-performance-pour-données-déséquilibrées" class="nav-link active" data-scroll-target="#critères-de-performance-pour-données-déséquilibrées"><span class="header-section-number">10.1</span> Critères de performance pour données déséquilibrées</a></li>
+  <li><a href="#ré-équilibrage" id="toc-ré-équilibrage" class="nav-link" data-scroll-target="#ré-équilibrage"><span class="header-section-number">10.2</span> Ré-équilibrage</a></li>
+  <li><a href="#exercices-supplémentaires" id="toc-exercices-supplémentaires" class="nav-link" data-scroll-target="#exercices-supplémentaires"><span class="header-section-number">10.3</span> Exercices supplémentaires</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-dondes" class="quarto-section-identifier"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Données déséquilibrées</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="cell">
+
+</div>
+<style>
+div.correction {
+  color: black;
+  background-color: #F0F0F0;
+  font-style: normal;
+  border: 2px solid orange;
+  border-radius: 10px;
+  padding: 1em;
+  display: none;
+}
+
+.corR {
+  font-style: italic;
+  display: none;
+}
+
+.algo{
+  color: black;
+  background-color: #F9C4ED;
+  font-style: normal;
+}
+</style>
+<p>On parle de <strong>données déséquilibrées</strong> lorsque les deux modalités de la variable cible <span class="math inline">\(Y\)</span> ne sont pas représentées de façon égale dans l’échantillon, ou plus précisément lorsqu’une des deux modalités est fortement majoritaire. Ce contexte est fréquemment rencontré en pratique, on peut citer les cas de détection de fraudes (peu de fraudeurs), de la présence d’une maladie rare (peu de patients atteints), du risque de crédit (peu de mauvais payeurs)… Les algorithmes standards peuvent être mis en difficultés et de nouvelles stratégies doivent être élaborées. Les stratégies classiques permettant de répondre à ce problème consistent à</p>
+<ul>
+<li>utiliser des critères de performance adaptés au déséquilibre ;</li>
+<li>ré-échantillonner les données pour se rapprocher d’une situation d’équilibre.</li>
+</ul>
+<p>Nous présentons ces stratégies à travers quelques exercices.</p>
+<section id="critères-de-performance-pour-données-déséquilibrées" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="critères-de-performance-pour-données-déséquilibrées"><span class="header-section-number">10.1</span> Critères de performance pour données déséquilibrées</h2>
+<p>La notion de <strong>risque</strong> en machine learning est capitale puisque c’est à partir de l’estimation de ces risques que l’on <strong>calibre des algorithmes</strong> et que l’on <strong>choisit un algorithme de prévision</strong>. En présence de données déséquilibré, il convient de choisir un risque adapté. En effet, il est le plus souvent important de parvenir à bien identifier des individus de la classe minoritaire. Des critères tels que l’accuracy ou l’erreur de classification ne sont pas pertinents pour ce cadre. On va privilégier des critères comme</p>
+<ul>
+<li>le <strong>balanced accuracy</strong> <span class="math display">\[\text{Bal Acc}=\frac{1}{2}\mathbf P(g(X)=1|Y=1)+\frac{1}{2}\mathbf P(g(X)=-1|Y=-1)=\frac{\text{TPR+TNR}}{2}.\]</span></li>
+<li>le <span class="math inline">\(F_1\)</span>-score <span class="math display">\[F_1=2\,\frac{\text{Precision }\times\text{Recall}}{\text{Precision }+\text{Recall}},\]</span> avec <span class="math display">\[\text{Precision}=\mathbf P(Y=1|g(X)=1)\quad\text{et}\quad\text{Recall}=\mathbf P(g(X)=1|Y=1).\]</span></li>
+<li>le <strong>kappa de Cohen</strong> <span class="math display">\[\kappa=\frac{\mathbf P(a)-\mathbf P(e)}{1-\mathbf P(e)}\]</span> où <span class="math inline">\(\mathbf P(a)\)</span> représente l’accuracy et <span class="math inline">\(\mathbf P(e)\)</span> l’accuracy sous une hypothèse d’indépendance.</li>
+<li>la courbe ROC et l’AUC…</li>
+</ul>
+<p>Comme d’habitude, ces critères sont inconnus et doivent être estimés par des méthodes de ré-échantillonnage de type validation croisée.</p>
+<div id="exr-exo-dondes-calc-criteres" class="theorem exercise">
+<p><span class="theorem-title"><strong>Exercice 10.1 (Calculer des critères) </strong></span>&nbsp;</p>
+<ol type="1">
+<li><p>Générer un vecteur d’observations <strong>Y</strong> de taille 500 selon une loi de Bernoulli de paramètre 0.05.</p></li>
+<li><p>Générer un vecteur de prévisions <strong>P1</strong> de taille 500 selon une loi de Bernoulli de paramètre 0.01.</p></li>
+<li><p>Générer un vecteur de prévision <strong>P2</strong> de taille 500 tel que <span class="math display">\[\mathcal L(P2|Y=0)=\mathcal B(0.10)\quad\text{et}\quad \mathcal L(P2|Y=1)=\mathcal B(0.85).\]</span></p></li>
+<li><p>Dresser les tables de contingence de <strong>P1</strong> et <strong>P2</strong> à l’aide de <strong>table</strong>. Commenter.</p>
+<div class="corR">
+<p>On remarque que <strong>P1</strong> a tendance à prédire très souvent 0 (la classe majoritaire) alors que <strong>P2</strong> est capable d’identifier plus d’invididus de la petite classe. Du point de vue de l’<strong>accuracy</strong> on va privilégier <strong>P1</strong>, néanmoins dans de nombreux cas <strong>P2</strong> est plus pertinent.</p>
+</div></li>
+<li><p>Pour <strong>P2</strong>, calculer, avec les fonctions usuelles de <code>R</code>, l’<strong>accuracy</strong>, le <strong>recall</strong> et la <strong>précision</strong>.</p></li>
+<li><p>En déduire le F1-score.</p></li>
+<li><p>Même question pour le <span class="math inline">\(\kappa\)</span> de Cohen.</p></li>
+<li><p>Retrouver ces indicateurs à l’aide de la fonction <strong>confusionMatrix</strong> de <strong>caret</strong> puis comparer les prévisions <strong>P1</strong> et <strong>P2</strong>.</p>
+<div class="corR">
+<p>L’<strong>accuracy</strong> privilégie clairement <strong>P1</strong> alors que d’autres critères comme le <strong>balanced accuracy</strong>, le <strong>F1-score</strong> ou le <strong>kappa de Cohen</strong> vont sélectionner <strong>P2</strong>. Ces derniers critères sont mieux adaptés pour prendre en considération la capacité à bien identifier la classe minoritaire.</p>
+</div></li>
+</ol>
+</div>
+</section>
+<section id="ré-équilibrage" class="level2" data-number="10.2">
+<h2 data-number="10.2" class="anchored" data-anchor-id="ré-équilibrage"><span class="header-section-number">10.2</span> Ré-équilibrage</h2>
+<p>En complément du choix d’un <strong>critère pertinent</strong>, il peut être intéressant de tenter de <strong>ré-équilibrer</strong> l’échantillon pour aider les algorithmes à mieux <strong>détecter les individus de la classe minoritaire</strong>. Les méthodes classiques consistent à créer de nouvelles observations de la classe minoritaire (<strong>oversampling</strong>) et/ou supprimer des individus de la classe minoritaire (<strong>undersampling</strong>).</p>
+<div id="exr-exo-dondes-etude-reeq" class="theorem exercise">
+<p><span class="theorem-title"><strong>Exercice 10.2 (Quelques algorithmes de ré-équilibrage) </strong></span>On considère le jeu de données <code>df</code> ci-dessous où on cherche à prédire <code>Y</code> par <code>X1</code> et <code>X2</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>X1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">5678</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>X2 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">9012</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>R1 <span class="ot">&lt;-</span> X1<span class="sc">&lt;=</span><span class="fl">0.25</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>R2 <span class="ot">&lt;-</span> (X1<span class="sc">&gt;</span><span class="fl">0.25</span> <span class="sc">&amp;</span> X2<span class="sc">&gt;=</span><span class="fl">0.75</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>R3 <span class="ot">&lt;-</span> (X1<span class="sc">&gt;</span><span class="fl">0.25</span> <span class="sc">&amp;</span> X2<span class="sc">&lt;</span><span class="fl">0.75</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>,n)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>Y[R1] <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="fu">sum</span>(R1),<span class="dv">1</span>,<span class="fl">0.75</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>Y[R2] <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="fu">sum</span>(R2),<span class="dv">1</span>,<span class="fl">0.75</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>Y[R3] <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="fu">sum</span>(R3),<span class="dv">1</span>,<span class="fl">0.25</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(X1,X2,Y)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>df1<span class="sc">$</span>Y <span class="ot">&lt;-</span> <span class="fu">factor</span>(df1<span class="sc">$</span>Y)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>indDY1 <span class="ot">&lt;-</span> <span class="fu">which</span>(df1<span class="sc">$</span>Y<span class="sc">==</span><span class="dv">1</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>df1<span class="fl">.1</span> <span class="ot">&lt;-</span> df1[<span class="sc">-</span>indDY1[<span class="dv">1</span><span class="sc">:</span><span class="dv">650</span>],]</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>df1<span class="fl">.2</span> <span class="ot">&lt;-</span> df1<span class="fl">.1</span>[<span class="fu">sample</span>(<span class="fu">nrow</span>(df1<span class="fl">.1</span>),<span class="dv">1000</span>),]</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df1<span class="fl">.2</span>[<span class="fu">sample</span>(<span class="fu">nrow</span>(df1<span class="fl">.2</span>),<span class="dv">100</span>),]</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(df) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df)<span class="sc">+</span><span class="fu">aes</span>(<span class="at">x=</span>X1,<span class="at">y=</span>X2,<span class="at">color=</span>Y)<span class="sc">+</span><span class="fu">geom_point</span>()</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>p1</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="10-dondes_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>On a ici 4 fois plus d’observations dans le groupe 0.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(df<span class="sc">$</span>Y)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="do">##  0  1 </span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="do">## 80 20</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li><p>On commence par faire du <strong>oversampling</strong> avec la fonction <code>RandOverClassif</code>.</p>
+<ol type="a">
+<li><p>Effectuer le ré-échantillonnage et expliquer.</p>
+<div class="corR">
+<p>On duplique des observations du groupe 1 pour atteindre le nombre d’observations du groupe 0.</p>
+</div></li>
+<li><p>Corriger les paramètres de la fonction de manière à avoir 80 observations dans le groupe 0 et 60 dans le groupe 1.</p>
+<div class="corR">
+<p>Il suffit de laisser intact le groupe 0 et de multiplier par 3 le nombre d’observations du groupe 1.</p>
+</div></li>
+</ol></li>
+<li><p>On s’intéresse maintenant à l’algorithme <strong>SMOTE</strong></p>
+<ol type="a">
+<li><p>Exécuter la fonction <strong>SmoteClassif</strong> avec <code>k=3</code> et les les paramètres par défaut</p>
+<div class="corR">
+<p>30 observations ont été crées par l’algorithme <strong>SMOTE</strong>. On a également enlevé des observations du groupe 1 pour avoir autant d’observations dans les deux groupes.</p>
+</div></li>
+<li><p>Visualiser les <strong>observations smote</strong>.</p></li>
+<li><p>Corriger les paramètres de la fonction de manière à avoir 80 observations dans le groupe 0 et 60 dans le groupe 1.</p>
+<div class="corR">
+<p>Ici encore il “suffit” de jouer avec l’option <code>C.perc</code>.</p>
+</div></li>
+</ol></li>
+<li><p>On souhaite maintenant ré-équilibrer par <strong>random undersampling</strong>. Utiliser la fonction <strong>RandUnderClassif</strong> pour effectuer un tel ré-équilibrage. Ici encore on pourra faire varier les paramètres.</p>
+<div class="corR">
+<p>On supprimer des obseravtions du groupe 0 pour avoir le même nombre d’observations dans les deux groupes. Ici encore on peut contrôler le niveau de ré-équilibrage avec <code>C.perc</code> :</p>
+</div></li>
+<li><p>On passe maintenant à l’algorithme <strong>Tomek</strong>.</p>
+<ol type="a">
+<li><p>Sans utiliser la fonction <strong>TomekClassif</strong> identifier les paires d’observations qui ont un <strong>lien de Tomek</strong>. On pourra utiliser la fonction <strong>nng</strong> du package <code>cccd</code>.</p>
+<div class="corR">
+<p>On rappelle que deux observations ont un lien de Tomek si elles sont plus proches voisins mutuels et de deux groupes différents. On commence donc par identifier les plus proches voisins mutuels :</p>
+</div>
+<div class="corR">
+<p>Puis on récupère les groupes de ces observations afin de ne conserver que les paires qui proviennent de groupes différents :</p>
+</div></li>
+<li><p>Retrouver ces paires à l’aide de la fonction Tomek LinK.</p></li>
+<li><p>Visualiser les observations supprimées. On prendra soin d’expliquer l’option <code>rem</code> de <strong>TomekClassif</strong>.</p>
+<div class="corR">
+<p>On dispose de deux stratégies. On peut enlever les paires entières qui sont <strong>T-link</strong> avec l’option par défaut</p>
+</div>
+<div class="corR">
+<p>On peut également ne supprimer que l’élelément du <strong>T-link</strong> du groupe majoritaire avec l’option <code>rem="maj"</code> :</p>
+</div></li>
+</ol></li>
+</ol>
+</div>
+<div id="exr-exo-dondes-comp-reeq" class="theorem exercise">
+<p><span class="theorem-title"><strong>Exercice 10.3 (Comparaison de méthodes de ré-équilibrage) </strong></span>On considère 3 jeux de données <code>df1</code>, <code>df2</code> et <code>df3</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>X1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">5678</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>X2 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">9012</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>R1 <span class="ot">&lt;-</span> X1<span class="sc">&lt;=</span><span class="fl">0.25</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>R2 <span class="ot">&lt;-</span> (X1<span class="sc">&gt;</span><span class="fl">0.25</span> <span class="sc">&amp;</span> X2<span class="sc">&gt;=</span><span class="fl">0.75</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>R3 <span class="ot">&lt;-</span> (X1<span class="sc">&gt;</span><span class="fl">0.25</span> <span class="sc">&amp;</span> X2<span class="sc">&lt;</span><span class="fl">0.75</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>,n)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>Y[R1] <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="fu">sum</span>(R1),<span class="dv">1</span>,<span class="fl">0.75</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>Y[R2] <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="fu">sum</span>(R2),<span class="dv">1</span>,<span class="fl">0.75</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>Y[R3] <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="fu">sum</span>(R3),<span class="dv">1</span>,<span class="fl">0.25</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(X1,X2,Y)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>df1<span class="sc">$</span>Y <span class="ot">&lt;-</span> <span class="fu">factor</span>(df1<span class="sc">$</span>Y)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>indDY1 <span class="ot">&lt;-</span> <span class="fu">which</span>(df1<span class="sc">$</span>Y<span class="sc">==</span><span class="dv">1</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> df1[<span class="sc">-</span>indDY1[<span class="dv">1</span><span class="sc">:</span><span class="dv">400</span>],]</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>df3 <span class="ot">&lt;-</span> df1[<span class="sc">-</span>indDY1[<span class="dv">1</span><span class="sc">:</span><span class="dv">700</span>],]</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> df1[<span class="fu">sample</span>(<span class="fu">nrow</span>(df1),<span class="dv">1000</span>),]</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> df2[<span class="fu">sample</span>(<span class="fu">nrow</span>(df2),<span class="dv">1000</span>),]</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>df3 <span class="ot">&lt;-</span> df3[<span class="fu">sample</span>(<span class="fu">nrow</span>(df3),<span class="dv">1000</span>),]</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li><p>Comparer la distribution de <strong>Y</strong> pour ces trois jeux de données et visualiser les observations.</p>
+<div class="corR">
+<p>Les trois échantillons sont de même taille. Le groupe 0 est toujours plus important que le groupe 1 mais le déséquilibre est plus prononcé pour l’échantillon 2 et surtout l’échantillon 3.</p>
+</div></li>
+<li><p>On sépare ces 3 échantillons en un échantillon d’apprentissage et un échantillon test.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>a1 <span class="ot">&lt;-</span> <span class="fu">createDataPartition</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df1),<span class="at">p=</span><span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>a2 <span class="ot">&lt;-</span> <span class="fu">createDataPartition</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df2),<span class="at">p=</span><span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>a3 <span class="ot">&lt;-</span> <span class="fu">createDataPartition</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df3),<span class="at">p=</span><span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>train1 <span class="ot">&lt;-</span> df1[a1<span class="sc">$</span>Resample1,]</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>train2 <span class="ot">&lt;-</span> df2[a2<span class="sc">$</span>Resample1,]</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>train3 <span class="ot">&lt;-</span> df3[a3<span class="sc">$</span>Resample1,]</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>test1 <span class="ot">&lt;-</span> df1[<span class="sc">-</span>a1<span class="sc">$</span>Resample1,]</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>test2 <span class="ot">&lt;-</span> df2[<span class="sc">-</span>a2<span class="sc">$</span>Resample1,]</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>test3 <span class="ot">&lt;-</span> df3[<span class="sc">-</span>a3<span class="sc">$</span>Resample1,]</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Ajuster une forêt aléatoire sur les 3 échantillon d’apprentissage, calculer les labels prédits sur les échantillons tests et estimer les différents indicateurs vus en cours à l’aide de <strong>confusionMatrix</strong>.</p>
+<div class="corR">
+<p>On remarque que l’accuracy est meilleur pour le 3ème échantillon, contrairement à des indicateurs tels que le <span class="math inline">\(\kappa\)</span> de Cohen ou le <strong>balanced accuracy</strong>.</p>
+</div></li>
+<li><p>On considère uniquement l’échantillon <strong>df3</strong>. Refaire l’analyse précédente en utilisant des techniques de ré-échantillonnage.</p>
+<div class="corR">
+<p>Le ré-équilibrage doit porter <strong>uniquement</strong> sur l’échantillon d’apprentissage. On propose d’utiliser le radom oversampling, smote, le random undersampling et tomek.</p>
+</div>
+<div class="corR">
+<p>On entraîne les forêts aléatoires sur ces nouveaux échantillons et on prédit les individus de l’échantillon test</p>
+</div>
+<div class="corR">
+<p>On en déduit les critères</p>
+</div>
+<div class="corR">
+<p>L’accuracy est sans surprise meilleur lorsqu’on ne ré-équilibre pas. Cependant les méthodes de ré-équilibrage permettent ici d’améliorer (plus ou moins) les autres critères.</p>
+</div></li>
+</ol>
+</div>
+</section>
+<section id="exercices-supplémentaires" class="level2" data-number="10.3">
+<h2 data-number="10.3" class="anchored" data-anchor-id="exercices-supplémentaires"><span class="header-section-number">10.3</span> Exercices supplémentaires</h2>
+<div id="exr-exo-dondes-echret" class="theorem exercise">
+<p><span class="theorem-title"><strong>Exercice 10.4 (Echantillonnage rétrospectif) </strong></span>Dans le cadre de l’échantillonnage rétrospectif pour le modèle logistique vu en cours, démontrer la propriété qui lie le modèle logistique initial au modèle ré-équilibré.</p>
+<div class="correction">
+<p>On a <span class="math display">\[\text{logit}\, p_\beta(x_i)=\log\frac{\mathbf P(y_i=1)}{\mathbf P(y_i=0)}\quad\text{et}\quad \text{logit}\, p_\gamma(x_i)=\log\frac{\mathbf P(y_i=1|s_i=1)}{\mathbf P(y_i=0|s_i=1)}.\]</span> Or <span class="math display">\[\mathbf P(y_i=1|s_i=1)=\frac{\mathbf P(y_i=1,s_i=1)}{\mathbf P(s_i=1)}=\frac{\mathbf P(s_i=1|y_i=1)\mathbf P(y_i=1)}{\mathbf P(s_i=1)}\]</span> et <span class="math display">\[\mathbf P(y_i=0|s_i=1)=\frac{\mathbf P(y_i=0,s_i=1)}{\mathbf P(s_i=1)}=\frac{\mathbf P(s_i=1|y_i=0)\mathbf P(y_i=0)}{\mathbf P(s_i=1)}.\]</span> Donc <span class="math display">\[\text{logit}\, p_\gamma(x_i)=\log\frac{\mathbf P(y_i=1)}{\mathbf P(y_i=0)}+\log\frac{\mathbf P(s_i=1|y_i=1)}{\mathbf P(s_i=1|y_i=0)}=\text{logit}\,p_\beta(x_i)+\log\left(\frac{\tau_{1}}{\tau_{0}}\right).\]</span></p>
+</div>
+</div>
+<div id="exr-exo-dondes-cas-temoins" class="theorem exercise">
+<p><span class="theorem-title"><strong>Exercice 10.5 (Echantillonnage rétrospectif) </strong></span>Une étude cas/témoins est réalisée pour mesurer l’effet du tabac sur une pathologie. Pour ce faire, on choisit <span class="math inline">\(n_1=250\)</span> patients atteints de la pathologie (cas) et <span class="math inline">\(n_0=250\)</span> patients sains (témoins). Les résultats de l’étude sont présentés ci-dessous</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">Fumeur</th>
+<th style="text-align: center;">Non fumeur</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Non malade</td>
+<td style="text-align: center;">48</td>
+<td style="text-align: center;">202</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Malade</td>
+<td style="text-align: center;">208</td>
+<td style="text-align: center;">42</td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li><p>A partir des données obtenues, estimer à l’aide d’un modèle logistique la probabilité d’être atteint pour un fumeur, puis pour un non fumeur.</p>
+<div class="corR">
+<p>Pour simplifier on va construire un jeu de données qui correspond au résultat :</p>
+</div>
+<div class="corR">
+<p>On peut maintenant estimer le modèle logistique et obtenir les prévisions demandées :</p>
+</div></li>
+<li><p>Comment interpréter ces deux probabilités ? Est-ce qu’elles estiment la probabilité d’être atteint pour un individu quelconque dans la population ?</p>
+<div class="corR">
+<p>Non ! On a échantillonné de manière à avoir autant de patients malades que non malades, ce qui n’est pas vrai dans la population totale. On est face à un biais d’échantillonnage que l’on peut corriger à l’aide de l’exercice précédent.</p>
+</div></li>
+<li><p>Des études précédentes ont montré que cinq individus sur mille sont atteints par la pathologie dans la population entière. En utilisant la propriété de l’exercice précédent, en déduire les probabilités d’être atteint pour un fumeur et un non fumeur dans la population.</p>
+<div class="corR">
+<p>On rappelle que <span class="math display">\[\tau_1=\mathbf P(S=1|Y=1)=\frac{\mathbf P(Y=1|S=1)\mathbf P(S=1)}{\mathbf P(Y=1)}.\]</span> Comme <span class="math inline">\(\mathbf P(Y=1|S=1)=\mathbf P(Y=0|S=1)=1/2\)</span>, on déduit <span class="math display">\[\frac{\tau_1}{\tau_0}=\frac{\mathbf P(Y=0)}{\mathbf P(Y=1)}=\frac{\pi_0}{\pi_1}=\frac{0.005}{0.995}.\]</span> On obtient ainsi les probabilités demandées avec</p>
+</div>
+<div class="corR">
+<p>On peut retrouver les paramètres du modèle corrigé en utilisant l’option <code>offset</code></p>
+</div></li>
+</ol>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  let localAlternateSentinel = 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copié");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copié");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./09-deep.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Réseaux de neurones avec Keras</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./11-comp-algos.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Comparaison d’algorithmes</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
