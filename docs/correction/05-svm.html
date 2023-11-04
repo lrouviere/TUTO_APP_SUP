@@ -966,23 +966,24 @@ y_i(w^tx_i+b)\geq 1 -\xi_i \\
 </div>
 <div class="cell" data-teacher="true">
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>svm.lin <span class="ot">&lt;-</span> <span class="fu">ksvm</span>(type<span class="sc">~</span>.,<span class="at">data=</span>spam,<span class="at">kernel=</span><span class="st">"polydot"</span>,</span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">C=</span><span class="dv">1</span>,<span class="at">kpar=</span><span class="fu">list</span>(<span class="at">degree=</span><span class="dv">1</span>,<span class="at">scale=</span><span class="dv">1</span>,<span class="at">offset=</span><span class="dv">0</span>))</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">C=</span><span class="dv">1</span>,<span class="at">kpar=</span><span class="fu">list</span>(<span class="at">degree=</span><span class="dv">1</span>,<span class="at">scale=</span><span class="dv">1</span>,<span class="at">offset=</span><span class="dv">0</span>))</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="corR">
 <p>Pour le noyau gaussien, il suffit d’utiliser l’option <code>kernel="rbfdot"</code> :</p>
 </div>
 <div class="cell" data-teacher="true">
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>svm.gauss <span class="ot">&lt;-</span> <span class="fu">ksvm</span>(type<span class="sc">~</span>.,<span class="at">data=</span>spam,<span class="at">kernel=</span><span class="st">"rbfdot"</span>,<span class="at">C=</span><span class="dv">1</span>,<span class="at">kpar=</span><span class="fu">list</span>(<span class="at">sigma=</span><span class="dv">1</span>))</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>svm.gauss <span class="ot">&lt;-</span> <span class="fu">ksvm</span>(type<span class="sc">~</span>.,<span class="at">data=</span>spam,<span class="at">kernel=</span><span class="st">"rbfdot"</span>,</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">C=</span><span class="dv">1</span>,<span class="at">kpar=</span><span class="fu">list</span>(<span class="at">sigma=</span><span class="dv">1</span>))</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></li>
 <li><p>Évaluer la performance des 2 svm précédentes en calculant l’erreur de classification par validation croisée 5 blocs. Comparer ces deux algorithmes.</p>
 <div class="corR">
 <p>Il suffit d’utiliser l’option <code>cross</code> dans <strong>ksvm</strong>.</p>
 </div>
-<div class="cell" data-teacher="true" data-hash="05-svm_cache/html/svm-lin-gaus-5folds_82ab5b46fa69e3c8a6513288d201f69d">
+<div class="cell" data-teacher="true" data-hash="05-svm_cache/html/svm-lin-gaus-5folds_e79c0960e81cb4fe0ce6d7457b5b5e6d">
 <div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>svm.lin <span class="ot">&lt;-</span> <span class="fu">ksvm</span>(type<span class="sc">~</span>.,<span class="at">data=</span>spam,<span class="at">kernel=</span><span class="st">"polydot"</span>,<span class="at">C=</span><span class="dv">1</span>,</span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">kpar=</span><span class="fu">list</span>(<span class="at">degree=</span><span class="dv">1</span>,<span class="at">scale=</span><span class="dv">1</span>,<span class="at">offset=</span><span class="dv">0</span>),<span class="at">cross=</span><span class="dv">5</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">kpar=</span><span class="fu">list</span>(<span class="at">degree=</span><span class="dv">1</span>,<span class="at">scale=</span><span class="dv">1</span>,<span class="at">offset=</span><span class="dv">0</span>),<span class="at">cross=</span><span class="dv">5</span>)</span>
 <span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>svm.gauss <span class="ot">&lt;-</span> <span class="fu">ksvm</span>(type<span class="sc">~</span>.,<span class="at">data=</span>spam,<span class="at">kernel=</span><span class="st">"rbfdot"</span>,<span class="at">C=</span><span class="dv">1</span>,</span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">kpar=</span><span class="fu">list</span>(<span class="at">sigma=</span><span class="dv">1</span>),<span class="at">cross=</span><span class="dv">5</span>)</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">kpar=</span><span class="fu">list</span>(<span class="at">sigma=</span><span class="dv">1</span>),<span class="at">cross=</span><span class="dv">5</span>)</span>
 <span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>svm.lin</span>
 <span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Support Vector Machine object of class "ksvm" </span></span>
 <span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
@@ -1016,22 +1017,23 @@ y_i(w^tx_i+b)\geq 1 -\xi_i \\
 <p>On remarque que l’erreur de classification est plus faible pour la svm linéaire. De plus, il y a un gros écart entre l’erreur de prévision et l’erreur d’ajustement pour le noyau gaussien, il est fort possible que l’on soit en sur-apprentissage avec ces valeurs de paramètres.</p>
 </div></li>
 <li><p>Refaire la svm à noyau gaussien avec l’option <code>kpar='automatic'</code>. Expliquer.</p>
-<div class="cell" data-teacher="true" data-hash="05-svm_cache/html/svm-gauss-5folds_a2deb283fe0778e09a4c1cd9307b0817">
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>svm.gauss <span class="ot">&lt;-</span> <span class="fu">ksvm</span>(type<span class="sc">~</span>.,<span class="at">data=</span>spam,<span class="at">kernel=</span><span class="st">"rbfdot"</span>,<span class="at">C=</span><span class="dv">1</span>,<span class="at">kpar=</span><span class="st">'automatic'</span>,<span class="at">cross=</span><span class="dv">5</span>)</span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>svm.gauss</span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Support Vector Machine object of class "ksvm" </span></span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="do">## SV type: C-svc  (classification) </span></span>
-<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="do">##  parameter : cost C = 1 </span></span>
-<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a><span class="do">## Gaussian Radial Basis kernel function. </span></span>
-<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a><span class="do">##  Hyperparameter : sigma =  0.0298786979455573 </span></span>
-<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a><span class="do">## Number of Support Vectors : 1412 </span></span>
-<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a><span class="do">## Objective Function Value : -807.0795 </span></span>
-<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a><span class="do">## Training error : 0.045642 </span></span>
-<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a><span class="do">## Cross validation error : 0.068461</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-teacher="true" data-hash="05-svm_cache/html/svm-gauss-5folds_2c95cb525c98dd4bb842ba9c497a09fe">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>svm.gauss <span class="ot">&lt;-</span> <span class="fu">ksvm</span>(type<span class="sc">~</span>.,<span class="at">data=</span>spam,<span class="at">kernel=</span><span class="st">"rbfdot"</span>,</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">C=</span><span class="dv">1</span>,<span class="at">kpar=</span><span class="st">'automatic'</span>,<span class="at">cross=</span><span class="dv">5</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>svm.gauss</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Support Vector Machine object of class "ksvm" </span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="do">## SV type: C-svc  (classification) </span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="do">##  parameter : cost C = 1 </span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a><span class="do">## Gaussian Radial Basis kernel function. </span></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a><span class="do">##  Hyperparameter : sigma =  0.0298786979455573 </span></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a><span class="do">## Number of Support Vectors : 1412 </span></span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a><span class="do">## Objective Function Value : -807.0795 </span></span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a><span class="do">## Training error : 0.045642 </span></span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a><span class="do">## Cross validation error : 0.068461</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="corR">
 <p>Le paramètre du noyau est ici calibré à partir d’une heuristique. La valeur choisie semble pertinente puisque l’erreur de prévision a diminué et est maintenant proche de l’erreur d’ajustement.</p>

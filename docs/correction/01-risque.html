@@ -455,7 +455,7 @@ div.correction {
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(prev3ppv<span class="sc">!=</span>dtest<span class="sc">$</span>Y)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.42</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></li>
-<li><p>Retrouver le résultat précédent à l’ai de la fonction <code>accuracy</code> du package <code>yardstick</code>.</p>
+<li><p>Retrouver le résultat précédent à l’aide la fonction <code>accuracy</code> du package <code>yardstick</code>.</p>
 <div class="cell" data-teacher="true">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(yardstick)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>tbl <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">prev=</span>prev3ppv,<span class="at">obs=</span>dtest<span class="sc">$</span>Y)</span>

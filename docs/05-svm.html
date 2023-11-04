@@ -399,13 +399,13 @@ div.correction {
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">20</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>X1 <span class="ot">&lt;-</span> <span class="fu">scale</span>(<span class="fu">runif</span>(n))</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>X1 <span class="ot">&lt;-</span> <span class="fu">scale</span>(<span class="fu">runif</span>(n))[,<span class="dv">1</span>]</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">567</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>X2 <span class="ot">&lt;-</span> <span class="fu">scale</span>(<span class="fu">runif</span>(n))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>X2 <span class="ot">&lt;-</span> <span class="fu">scale</span>(<span class="fu">runif</span>(n))[,<span class="dv">1</span>]</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="sc">-</span><span class="dv">1</span>,n)</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>Y[X1<span class="sc">&gt;</span>X2] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(Y)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>donnees <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">X1=</span>X1,<span class="at">X2=</span>X2,<span class="at">Y=</span>Y)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>donnees <span class="ot">&lt;-</span> <span class="fu">tibble</span>(X1,X2,Y)</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(donnees)<span class="sc">+</span><span class="fu">aes</span>(<span class="at">x=</span>X2,<span class="at">y=</span>X1,<span class="at">color=</span>Y)<span class="sc">+</span><span class="fu">geom_point</span>()</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>p</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
@@ -418,7 +418,7 @@ div.correction {
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>mod.svm <span class="ot">&lt;-</span> <span class="fu">svm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>donnees,<span class="at">kernel=</span><span class="st">"linear"</span>,<span class="at">cost=</span><span class="dv">10000000000</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol type="1">
-<li><p>Récupérer les vecteurs supports et visualiser les sur le graphe (en utilisant une autre couleur par exemple). On les affectera à un <strong>data.frame</strong> dont les 2 premières colonnes représenteront les valeurs de <span class="math inline">\(X_1\)</span> et <span class="math inline">\(X_2\)</span> des vecteurs supports.</p>
+<li><p>Récupérer les vecteurs supports et visualiser les sur le graphe (en utilisant une autre couleur par exemple). On les affectera à un <strong>tiible</strong> dont les 2 premières colonnes représenteront les valeurs de <span class="math inline">\(X_1\)</span> et <span class="math inline">\(X_2\)</span> des vecteurs supports.</p>
 <div class="corR">
 <p>Les vecteurs supports se trouvent dans la sortie <code>index</code> de la fonction <strong>svm</strong> :</p>
 </div>
@@ -428,16 +428,19 @@ div.correction {
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>...</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="corR">
-<p>On peut ainsi représenter la marge en traçant les droites qui passent par ces points.</p>
+<p>On peut ainsi représenter la marge en traçant les droites qui passent par ces points :</p>
 </div></li>
 <li><p>Retrouver ce graphe à l’aide de la fonction <strong>plot</strong>.</p></li>
 <li><p>Rappeler la règle de décision associée à la méthode SVM. Donner les estimations des paramètres de la règle de décision sur cet exemple. On pourra notamment regarder la sortie <code>coef</code> de la fonction <strong>svm</strong>.</p>
 <div class="corR">
-<p>Une fois <span class="math inline">\(w^\star\)</span> et <span class="math inline">\(b^\star\)</span> obtenus, la règle s’écrit <span class="math display">\[g(x)=1_{\langle w^\star,x\rangle+b^\star\leq 0}-1_{\langle w^\star,x\rangle+b^\star\mt  0}.\]</span></p>
+<p>Une fois <span class="math inline">\(w^\star\)</span> et <span class="math inline">\(b^\star\)</span> obtenus, la règle s’écrit <span class="math display">\[g(x)=1_{\langle w^\star,x\rangle+b^\star\leq 0}-1_{\langle w^\star,x\rangle+b^\star &gt;0}.\]</span></p>
 <p>L’objet <code>mod.svm$coefs</code> contient les coefficients <span class="math inline">\(\alpha_i^\star y_i\)</span> pour chaque vecteur support. On peut ainsi récupérer l’équation de l’hyperplan et faire la prévision avec</p>
 </div>
 <div class="corR">
-<p>L’hyperplan séparateur a donc pour équation : <span class="math display">\[-1.74x_1+2.12x_2-0.40=0.\]</span></p>
+<p>L’hyperplan séparateur a donc pour équation : <span class="math display">\[-1.74x_1+2.12x_2-0.40=0.\]</span> On peut retrouver directement cette équation avec la fonction <strong>coef</strong> :</p>
+</div>
+<div class="corR">
+<p>On peut donc rajouter la règle de décision :</p>
 </div></li>
 <li><p>On dispose d’un nouvel individu <span class="math inline">\(x=(-0.5,0.5)\)</span>. Expliquer comment on peut prédire son groupe.</p>
 <div class="corR">
@@ -514,7 +517,7 @@ y_i(w^tx_i+b)\geq 1 -\xi_i \\
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.grid.major =</span> <span class="fu">element_blank</span>(),</span>
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>())</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="05-svm_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+<p><img src="05-svm_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <ol type="1">
@@ -564,7 +567,7 @@ y_i(w^tx_i+b)\geq 1 -\xi_i \\
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> X <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">Y=</span><span class="fu">as.factor</span>(Y))</span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df)<span class="sc">+</span><span class="fu">aes</span>(<span class="at">x=</span>V2,<span class="at">y=</span>V1,<span class="at">color=</span>Y)<span class="sc">+</span><span class="fu">geom_point</span>()<span class="sc">+</span><span class="fu">theme_classic</span>()</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="05-svm_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
+<p><img src="05-svm_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <ol type="1">
@@ -577,7 +580,7 @@ y_i(w^tx_i+b)\geq 1 -\xi_i \\
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>mod.svm1 <span class="ot">&lt;-</span> <span class="fu">svm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df,<span class="at">kernel=</span><span class="st">"radial"</span>,<span class="at">gamma=</span><span class="dv">1</span>,<span class="at">cost=</span><span class="dv">1</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mod.svm1,df,<span class="at">grid=</span><span class="dv">250</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="05-svm_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
+<p><img src="05-svm_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="corR">
@@ -645,7 +648,7 @@ y_i(w^tx_i+b)\geq 1 -\xi_i \\
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df)<span class="sc">+</span><span class="fu">aes</span>(<span class="at">x=</span>X,<span class="at">y=</span>Y)<span class="sc">+</span><span class="fu">geom_point</span>()</span>
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>p1</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="05-svm_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid" width="672"></p>
+<p><img src="05-svm_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>On souhaite faire une <strong>SVR</strong> permettant de prédire <span class="math inline">\(Y\)</span> par <span class="math inline">\(X\)</span>. On peut l’obtenir sur <strong>R</strong> toujours avec la fonction <strong>svm</strong> de <strong>e1071</strong>:</p>
@@ -786,7 +789,7 @@ y_i(w^tx_i+b)\geq 1 -\xi_i \\
 </div></li>
 <li><p>Interpréter les conditions KKT.</p>
 <div class="correction">
-<p>Les <span class="math inline">\(x_i\)</span> tels que <span class="math inline">\(\alpha_i^\star\mt 0\)</span> vérifient</p>
+<p>Les <span class="math inline">\(x_i\)</span> tels que <span class="math inline">\(\alpha_i^\star&gt; 0\)</span> vérifient</p>
 <p><span class="math display">\[y_i(\langle w^\star,x_i\rangle+b^\star)=1.\]</span></p>
 <p>Ils se situent donc sur la frontière définissant la marge maximale. Ce sont les vecteurs supports.</p>
 </div></li>
@@ -807,7 +810,7 @@ y_i(w^tx_i+b)\geq 1 -\xi_i \\
 <li><p>Expliquer comment on classe un nouveau point <span class="math inline">\(x\in\mathbb R^3\)</span> par la méthode <strong>svm</strong>.</p>
 <div class="correction">
 <p>Une fois <span class="math inline">\(w^\star\)</span> et <span class="math inline">\(b^\star\)</span> obtenus, la règle s’écrit</p>
-<p><span class="math display">\[g(x)=1_{\langle w^\star,x\rangle+b^\star\leq 0}-1_{\langle w^\star,x\rangle+b^\star\mt 0}.\]</span></p>
+<p><span class="math display">\[g(x)=1_{\langle w^\star,x\rangle+b^\star\leq 0}-1_{\langle w^\star,x\rangle+b^\star&gt; 0}.\]</span></p>
 </div></li>
 <li><p>Les données se trouvent dans un dataframe <code>df</code>. On exécute</p>
 <div class="cell">
