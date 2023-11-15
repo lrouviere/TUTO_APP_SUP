@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Apprentissage supervisé avec R - 5&nbsp; Support Vector Machine (SVM)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./06-arbres.html" rel="next">
+<link href="./04-lda.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "Pas de résultats",
+    "search-matching-documents-text": "documents trouvés",
+    "search-copy-link-title": "Copier le lien vers la recherche",
+    "search-hide-matches-text": "Cacher les correspondances additionnelles",
+    "search-more-match-text": "correspondance de plus dans ce document",
+    "search-more-matches-text": "correspondances de plus dans ce document",
+    "search-clear-button-title": "Effacer",
+    "search-detached-cancel-button-title": "Annuler",
+    "search-submit-button-title": "Envoyer",
+    "search-label": "Recherche"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Apprentissage supervisé - Laurent Rouvière</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Recherche"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Basculer la navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+</ul>
+            <div class="quarto-navbar-tools tools-wide">
+    <div class="dropdown">
+      <a href="" title="Download" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download"><i class="bi bi-download"></i></a>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="./Apprentissage-supervisé-avec-R.pdf">
+              <i class="bi bi-bi-file-pdf pe-1"></i>
+            Download PDF
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="./Apprentissage-supervisé-avec-R.epub">
+              <i class="bi bi-bi-journal pe-1"></i>
+            Download ePub
+            </a>
+          </li>
+      </ul>
+    </div>
+    <div class="dropdown">
+      <a href="" title="Share" id="quarto-navigation-tool-dropdown-1" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Share"><i class="bi bi-share"></i></a>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="quarto-navigation-tool-dropdown-1">
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://twitter.com/intent/tweet?url=|url|">
+              <i class="bi bi-bi-twitter pe-1"></i>
+            Twitter
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
+              <i class="bi bi-bi-facebook pe-1"></i>
+            Facebook
+            </a>
+          </li>
+      </ul>
+    </div>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Basculer le mode sombre"><i class="bi"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Basculer en mode lecteur">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Basculer la barre latérale" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-lda.html">Algorithmes linéraires</a></li><li class="breadcrumb-item"><a href="./05-svm.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Support Vector Machine (SVM)</span></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Basculer la barre latérale" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Recherche"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Présentation</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Notion de risque en apprentissage</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Basculer la section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-risque.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Calcul de risques avec R</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-est-risque.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Estimation du risque par ré-échantillonnage</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-comp-risque.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Compléments</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Algorithmes linéraires</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Basculer la section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-lda.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Analyse discriminante linéaire</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-svm.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Support Vector Machine (SVM)</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">Arbres et agrégation d’arbres</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Basculer la section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-arbres.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Méthodes CART</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-forets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Forêts aléatoires</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-boosting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Gradient boosting</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">Autres</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Basculer la section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-deep.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Réseaux de neurones avec Keras</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-dondes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Données déséquilibrées</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-comp-algos.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Comparaison d’algorithmes</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Références</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table des matières</h2>
+   
+  <ul>
+  <li><a href="#cas-séparable" id="toc-cas-séparable" class="nav-link active" data-scroll-target="#cas-séparable"><span class="header-section-number">5.1</span> Cas séparable</a></li>
+  <li><a href="#cas-non-séparable" id="toc-cas-non-séparable" class="nav-link" data-scroll-target="#cas-non-séparable"><span class="header-section-number">5.2</span> Cas non séparable</a></li>
+  <li><a href="#lastuce-du-noyau" id="toc-lastuce-du-noyau" class="nav-link" data-scroll-target="#lastuce-du-noyau"><span class="header-section-number">5.3</span> L’astuce du noyau</a></li>
+  <li><a href="#support-vector-regression" id="toc-support-vector-regression" class="nav-link" data-scroll-target="#support-vector-regression"><span class="header-section-number">5.4</span> Support vector regression</a></li>
+  <li><a href="#svm-sur-les-données-spam" id="toc-svm-sur-les-données-spam" class="nav-link" data-scroll-target="#svm-sur-les-données-spam"><span class="header-section-number">5.5</span> SVM sur les données spam</a></li>
+  <li><a href="#exercices" id="toc-exercices" class="nav-link" data-scroll-target="#exercices"><span class="header-section-number">5.6</span> Exercices</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-SVM" class="quarto-section-identifier"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Support Vector Machine (SVM)</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="cell">
+
+</div>
+<style>
+div.correction {
+  color: black;
+  background-color: #F0F0F0;
+  font-style: normal;
+  border: 2px solid orange;
+  border-radius: 10px;
+  padding: 1em;
+  /*display: none;*/
+}
+
+.corR {
+  font-style: italic;
+  /*display: none;*/
+}
+
+.algo{
+  color: black;
+  background-color: #F9C4ED;
+  font-style: normal;
+}
+</style>
+<p>Etant donnée un échantillon <span class="math inline">\((x_1,y_1),\dots,(x_n,y_n)\)</span> où les <span class="math inline">\(x_i\)</span> sont à valeurs dans <span class="math inline">\(\mathbb R^p\)</span> et les <span class="math inline">\(y_i\)</span> sont binaires à valeurs dans <span class="math inline">\(\{-1,1\}\)</span>, l’approche <strong>SVM</strong> cherche le <strong>meilleur hyperplan</strong> en terme de séparation des données. Globalement on veut que les <code>1</code> se trouvent d’un coté de l’hyperplan et les <code>-1</code> de l’autre. Dans cette partie on propose d’étudier la mise en œuvre de cet algorithme tout d’abord dans le cas idéal où les données sont séparables puis dans le cas plus réel où elles ne le sont pas. Nous verrons ensuite comment introduire de la non linéarité ne utilisant l’<strong>astuce du noyau</strong>.</p>
+<section id="cas-séparable" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="cas-séparable"><span class="header-section-number">5.1</span> Cas séparable</h2>
+<p>Le cas séparable est le cas facile : il correspond à la situation où il existe effectivement un (même plusieurs) hyperplan(s) qui sépare(nt) parfaitement les 1 des -1. Il ne se produit quasiment jamais en pratique mais il convient de l’étudier pour comprendre comment est construit l’algorithme. Dans ce cas on cherche l’hyperplan d’équation <span class="math inline">\(\langle w,x\rangle+b=w^tx+b=0\)</span> tel que la <strong>marge</strong> (qui peut être vue comme la distance entre les observations les plus proches de l’hyperplan et l’hyperplan) soit maximale. Mathématiquement le problème se réécrit comme un problème d’optimisation sous contraintes :</p>
+<p><span id="eq-eq:svm-non-sep"><span class="math display">\[
+\min_{w,b}\frac{1}{2}\|w\|^2
+\tag{5.1}\]</span></span></p>
+<p><span class="math display">\[
+\text{sous les contraintes } y_i(w^tx_i+b)\geq 1,\ i=1,\dots,n.
+\]</span></p>
+<p>La solution s’obtient de façon classique en résolvant le problème dual et elle s’écrit comme une combinaison linéaire des <span class="math inline">\(x_i\)</span> <span class="math display">\[w^\star=\sum_{i=1}^n\alpha_i^\star y_ix_i.\]</span> De plus, les conditions <strong>KKT</strong> impliquent que pour tout <span class="math inline">\(i=1,\dots,n\)</span>:</p>
+<ul>
+<li><span class="math inline">\(\alpha_i^\star=0\)</span></li>
+</ul>
+<p>ou</p>
+<ul>
+<li><span class="math inline">\(y_i(x_i^tw+b)-1=0.\)</span></li>
+</ul>
+<p>Ces conditions impliquent que <span class="math inline">\(w^\star\)</span> s’écrit comme une combinaison linéaire de quelques points, appelés <strong>vecteurs supports</strong> qui se trouvent <strong>sur la marge</strong>. Nous proposons maintenant de retrouver ces points et de tracer la marge sur un exemple simple.</p>
+<p>On considère le nuage de points suivant :</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">20</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>X1 <span class="ot">&lt;-</span> <span class="fu">scale</span>(<span class="fu">runif</span>(n))[,<span class="dv">1</span>]</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">567</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>X2 <span class="ot">&lt;-</span> <span class="fu">scale</span>(<span class="fu">runif</span>(n))[,<span class="dv">1</span>]</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="sc">-</span><span class="dv">1</span>,n)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>Y[X1<span class="sc">&gt;</span>X2] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(Y)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>donnees <span class="ot">&lt;-</span> <span class="fu">tibble</span>(X1,X2,Y)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(donnees)<span class="sc">+</span><span class="fu">aes</span>(<span class="at">x=</span>X2,<span class="at">y=</span>X1,<span class="at">color=</span>Y)<span class="sc">+</span><span class="fu">geom_point</span>()</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>p</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>La fonction <strong>svm</strong> du package <strong>e1071</strong> permet d’ajuster une SVM :</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(e1071)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>mod.svm <span class="ot">&lt;-</span> <span class="fu">svm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>donnees,<span class="at">kernel=</span><span class="st">"linear"</span>,<span class="at">cost=</span><span class="dv">10000000000</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li><p>Récupérer les vecteurs supports et visualiser les sur le graphe (en utilisant une autre couleur par exemple). On les affectera à un <strong>tiible</strong> dont les 2 premières colonnes représenteront les valeurs de <span class="math inline">\(X_1\)</span> et <span class="math inline">\(X_2\)</span> des vecteurs supports.</p>
+<div class="corR">
+<p>Les vecteurs supports se trouvent dans la sortie <code>index</code> de la fonction <strong>svm</strong> :</p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ind.svm <span class="ot">&lt;-</span> mod.svm<span class="sc">$</span>index</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>sv <span class="ot">&lt;-</span> donnees <span class="sc">|&gt;</span> <span class="fu">slice</span>(ind.svm)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>sv</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 3 × 3</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="do">##        X1     X2 Y    </span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="do">##     &lt;dbl&gt;  &lt;dbl&gt; &lt;fct&gt;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 -1.61   -0.660 -1   </span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="do">## 2  0.0696  0.714 -1   </span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="do">## 3 -0.311  -0.533 1</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> p<span class="sc">+</span><span class="fu">geom_point</span>(<span class="at">data=</span>sv,<span class="fu">aes</span>(<span class="at">x=</span>X2,<span class="at">y=</span>X1),<span class="at">color=</span><span class="st">"blue"</span>,<span class="at">size=</span><span class="dv">2</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>On peut ainsi représenter la marge en traçant les droites qui passent par ces points :</p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>sv1 <span class="ot">&lt;-</span> sv[,<span class="dv">2</span><span class="sc">:</span><span class="dv">1</span>]</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> ((sv1[<span class="dv">1</span>,<span class="dv">2</span>]<span class="sc">-</span>sv1[<span class="dv">2</span>,<span class="dv">2</span>])<span class="sc">/</span>(sv1[<span class="dv">1</span>,<span class="dv">1</span>]<span class="sc">-</span>sv1[<span class="dv">2</span>,<span class="dv">1</span>])) <span class="sc">|&gt;</span> <span class="fu">as.numeric</span>()</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> (sv1[<span class="dv">1</span>,<span class="dv">2</span>]<span class="sc">-</span>b<span class="sc">*</span>sv1[<span class="dv">1</span>,<span class="dv">1</span>]) <span class="sc">|&gt;</span> <span class="fu">as.numeric</span>()</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>a1 <span class="ot">&lt;-</span> (sv1[<span class="dv">3</span>,<span class="dv">2</span>]<span class="sc">-</span>b<span class="sc">*</span>sv1[<span class="dv">3</span>,<span class="dv">1</span>]) <span class="sc">|&gt;</span> <span class="fu">as.numeric</span>()</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>(p2 <span class="ot">&lt;-</span> p1<span class="sc">+</span><span class="fu">geom_abline</span>(<span class="at">intercept =</span> <span class="fu">c</span>(a,a1),<span class="at">slope=</span>b,<span class="at">col=</span><span class="st">"blue"</span>,<span class="at">linewidth=</span><span class="dv">1</span>))</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div></li>
+<li><p>Retrouver ce graphe à l’aide de la fonction <strong>plot</strong>.</p>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mod.svm,<span class="at">data=</span>donnees,<span class="at">grid=</span><span class="dv">250</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div></li>
+<li><p>Rappeler la règle de décision associée à la méthode SVM. Donner les estimations des paramètres de la règle de décision sur cet exemple. On pourra notamment regarder la sortie <code>coef</code> de la fonction <strong>svm</strong>.</p>
+<div class="corR">
+<p>Une fois <span class="math inline">\(w^\star\)</span> et <span class="math inline">\(b^\star\)</span> obtenus, la règle s’écrit <span class="math display">\[g(x)=1_{\langle w^\star,x\rangle+b^\star\leq 0}-1_{\langle w^\star,x\rangle+b^\star &gt;0}.\]</span></p>
+<p>L’objet <code>mod.svm$coefs</code> contient les coefficients <span class="math inline">\(\alpha_i^\star y_i\)</span> pour chaque vecteur support. On peut ainsi récupérer l’équation de l’hyperplan et faire la prévision avec</p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>w <span class="ot">&lt;-</span> <span class="fu">apply</span>(mod.svm<span class="sc">$</span>coefs<span class="sc">*</span>donnees[mod.svm<span class="sc">$</span>index,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>],<span class="dv">2</span>,sum)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#ou w &lt;- t(mod.svm$coefs) %*% mod.svm$SV</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="sc">-</span>mod.svm<span class="sc">$</span>rho</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>b</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.4035113</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>L’hyperplan séparateur a donc pour équation : <span class="math display">\[-1.74x_1+2.12x_2-0.40=0.\]</span> On peut retrouver directement cette équation avec la fonction <strong>coef</strong> :</p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(cc <span class="ot">&lt;-</span> <span class="fu">coef</span>(mod.svm))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="do">## (Intercept)          X1          X2 </span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="do">##  -0.4035113  -1.7450996   2.1360294</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>On peut donc rajouter la règle de décision :</p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>p2<span class="sc">+</span><span class="fu">geom_abline</span>(<span class="at">intercept =</span> <span class="sc">-</span>cc[<span class="dv">1</span>]<span class="sc">/</span>cc[<span class="dv">2</span>],<span class="at">slope =</span> <span class="sc">-</span>cc[<span class="dv">3</span>]<span class="sc">/</span>cc[<span class="dv">2</span>],<span class="at">linewidth=</span><span class="dv">1</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+</div>
+</div></li>
+<li><p>On dispose d’un nouvel individu <span class="math inline">\(x=(-0.5,0.5)\)</span>. Expliquer comment on peut prédire son groupe.</p>
+<div class="corR">
+<p>Il suffit de calculer <span class="math inline">\(\langle w^\star,x\rangle+b\)</span> et de prédire en fonction du signe de cette valeur :</p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>newX <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">X1=</span><span class="sc">-</span><span class="fl">0.5</span>,<span class="at">X2=</span><span class="fl">0.5</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(w<span class="sc">*</span>newX)<span class="sc">+</span>b</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 1.537053</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>On prédira le groupe <code>-1</code> pour ce nouvel individu.</p>
+</div></li>
+<li><p>Retrouver les résultats de la question précédente à l’aide de la fonction <strong>predict</strong>. On pourra utiliser l’option <code>decision.values = TRUE</code>.</p>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(mod.svm,newX,<span class="at">decision.values =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="do">##  1 </span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="do">## -1 </span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="do">## attr(,"decision.values")</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="do">##       -1/1</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 1.537053</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Levels: -1 1</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>Plus cette valeur est élevée, plus on est loin de l’hyperplan. On peut donc l’interpréter comme un score.</p>
+</div></li>
+<li><p>Obtenir les probabilités prédites à l’aide de la fonction <strong>predict</strong>. On pourra utiliser <code>probability=TRUE</code> dans la fonction <strong>svm</strong>.</p>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>mod.svm1 <span class="ot">&lt;-</span> <span class="fu">svm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>donnees,<span class="at">kernel=</span><span class="st">"linear"</span>,<span class="at">cost=</span><span class="dv">10000000000</span>,<span class="at">probability=</span><span class="cn">TRUE</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(mod.svm1,newX,<span class="at">decision.values=</span><span class="cn">TRUE</span>,<span class="at">probability=</span><span class="cn">TRUE</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="do">##  1 </span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="do">## -1 </span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="do">## attr(,"decision.values")</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="do">##       -1/1</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 1.537053</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="do">## attr(,"probabilities")</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="do">##          -1         1</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 0.8294474 0.1705526</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="do">## Levels: -1 1</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>Comme souvent, il est possible d’obtenir une estimation des probabilités d’être dans les groupes <code>-1</code> et <code>1</code> à partir du score, il “suffit” de ramener ce score sur l’échelle <span class="math inline">\([0,1]\)</span> avec des transformations de type logit par exemple. Pour la svm, ces probabilités sont obtenues en ajustant un modèle logistique sur les scores <span class="math inline">\(S(x)\)</span> :</p>
+<p><span class="math display">\[
+P(Y=1|X=x)=\frac{1}{1+\exp(aS(x)+b)}.
+\]</span></p>
+<p>On peut retrouver ces probabilités avec :</p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>score.newX <span class="ot">&lt;-</span> <span class="fu">sum</span>(w<span class="sc">*</span>newX)<span class="sc">+</span>b</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>(mod.svm1<span class="sc">$</span>probB<span class="sc">+</span>mod.svm1<span class="sc">$</span>probA<span class="sc">*</span>score.newX)))</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.1705526</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+</ol>
+</section>
+<section id="cas-non-séparable" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="cas-non-séparable"><span class="header-section-number">5.2</span> Cas non séparable</h2>
+<p>Dans la vraie vie, les groupes ne sont généralement pas séparables et il n’existe donc pas de solution au problème <a href="#eq-eq:svm-non-sep">équation&nbsp;<span>5.1</span></a>. On va donc autoriser certains points à être :</p>
+<ul>
+<li>mal classés</li>
+</ul>
+<p>et/ou</p>
+<ul>
+<li>bien classés mais à l’intérieur de la marge.</li>
+</ul>
+<p>Mathématiquement, cela revient à introduire des <strong>variables ressorts</strong> (<strong>slacks variables</strong>) <span class="math inline">\(\xi_1,\dots,\xi_n\)</span> positives telles que :</p>
+<ul>
+<li><span class="math inline">\(\xi_i\in [0,1]\Longrightarrow\)</span> <span class="math inline">\(i\)</span> bien classé mais <strong>dans</strong> la région définie par la <strong>marge</strong> ;</li>
+<li><span class="math inline">\(\xi_i&gt;1 \Longrightarrow\)</span> <span class="math inline">\(i\)</span> <strong>mal classé</strong>.</li>
+</ul>
+<p>Le problème d’optimisation est alors de minimiser en <span class="math inline">\((w,b,\xi)\)</span></p>
+<p><span class="math display">\[\frac{1}{2}\|w\|^2 +C\sum_{i=1}^n\xi_i\]</span> <span class="math display">\[\textrm{sous les contraintes }
+\left\{
+  \begin{array}{l}
+y_i(w^tx_i+b)\geq 1 -\xi_i \\
+\xi_i\geq 0, i=1,\dots,n.
+  \end{array}\right.\]</span></p>
+<p>Le paramètre <span class="math inline">\(C&gt;0\)</span> est à <strong>calibrer</strong> et on remarque que le cas séparable correspond à <span class="math inline">\(C\to +\infty\)</span>. Les solutions de ce nouveau problème d’optimisation s’obtiennent de la même façon que dans le cas séparable, en particulier <span class="math inline">\(w^\star\)</span> s’écrit toujours comme une combinaison linéaire</p>
+<p><span class="math display">\[w^\star=\sum_{i=1}^n\alpha_i^\star y_ix_i.\]</span></p>
+<p>de <strong>vecteurs supports</strong> sauf qu’on distingue deux types de vecteurs supports (<span class="math inline">\(\alpha_i^\star&gt;0\)</span>):</p>
+<ul>
+<li>ceux <strong>sur la frontière</strong> définie par la marge : <span class="math inline">\(\xi_i^\star=0\)</span> ;</li>
+<li>ceux <strong>en dehors</strong> : <span class="math inline">\(\xi_i^\star&gt;0\)</span> et <span class="math inline">\(\alpha_i^\star=C\)</span>.</li>
+</ul>
+<p>Le choix de <span class="math inline">\(C\)</span> est crucial : ce paramètre régule le <strong>compromis biais/variance</strong> de la svm :</p>
+<ul>
+<li><span class="math inline">\(C\searrow\)</span>: la marge est privilégiée et les <span class="math inline">\(\xi_i\nearrow\)</span> <span class="math inline">\(\Longrightarrow\)</span> beaucoup d’observations dans la marge ou <strong>mal classées</strong> (et donc <strong>beaucoup de vecteurs supports</strong>).</li>
+<li><span class="math inline">\(C\nearrow\Longrightarrow\)</span> <span class="math inline">\(\xi_i\searrow\)</span> donc moins d’observations mal classées <span class="math inline">\(\Longrightarrow\)</span> <strong>meilleur ajustement</strong> mais petite marge <span class="math inline">\(\Longrightarrow\)</span> risque de <strong>surajustement</strong>.</li>
+</ul>
+<p>On choisit généralement ce paramètre à l’aide des techniques présentées dans le chapitre <a href="02-est-risque.html"><span>Chapitre&nbsp;2</span></a> :</p>
+<ul>
+<li>choix d’une grille de valeurs de <span class="math inline">\(C\)</span> et d’un critère ;</li>
+<li>choix d’une méthode de ré-échantillonnage pour estimer le critère ;</li>
+<li>choix de la valeur de <span class="math inline">\(C\)</span> qui minimise le critère estimé.</li>
+</ul>
+<p>On considère le jeu de données <code>df3</code> définie ci-dessous.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">matrix</span>(<span class="fu">runif</span>(<span class="dv">2</span><span class="sc">*</span>n),<span class="at">ncol=</span><span class="dv">2</span>))</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span> <span class="fu">filter</span>(V1<span class="sc">&lt;=</span>V2)<span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">Y=</span><span class="fu">rbinom</span>(<span class="fu">n</span>(),<span class="dv">1</span>,<span class="fl">0.95</span>))</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span> <span class="fu">filter</span>(V1<span class="sc">&gt;</span>V2)<span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">Y=</span><span class="fu">rbinom</span>(<span class="fu">n</span>(),<span class="dv">1</span>,<span class="fl">0.05</span>))</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>df3 <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(df1,df2) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">Y=</span><span class="fu">as.factor</span>(Y))</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df3)<span class="sc">+</span><span class="fu">aes</span>(<span class="at">x=</span>V2,<span class="at">y=</span>V1,<span class="at">color=</span>Y)<span class="sc">+</span><span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#FFFFC8"</span>, <span class="st">"#7D0025"</span>))<span class="sc">+</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"#BFD5E3"</span>, <span class="at">colour =</span> <span class="st">"#6D9EC1"</span>,<span class="at">size =</span> <span class="dv">2</span>, <span class="at">linetype =</span> <span class="st">"solid"</span>),</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.grid.major =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>())</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<ol type="1">
+<li><p>Ajuster 3 svm en considérant comme valeur de <span class="math inline">\(C\)</span> : 0.000001, 0.1 et 5. On pourra utiliser l’option <code>cost</code>.</p>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mod.svm1 <span class="ot">&lt;-</span> <span class="fu">svm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df3,<span class="at">kernel=</span><span class="st">"linear"</span>,<span class="at">cost=</span><span class="fl">0.000001</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>mod.svm2 <span class="ot">&lt;-</span> <span class="fu">svm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df3,<span class="at">kernel=</span><span class="st">"linear"</span>,<span class="at">cost=</span><span class="fl">0.1</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>mod.svm3 <span class="ot">&lt;-</span> <span class="fu">svm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df3,<span class="at">kernel=</span><span class="st">"linear"</span>,<span class="at">cost=</span><span class="dv">5</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+<li><p>Calculer les nombres de vecteurs supports pour chaque valeur de <span class="math inline">\(C\)</span>.</p>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>mod.svm1<span class="sc">$</span>nSV</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 469 469</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>mod.svm2<span class="sc">$</span>nSV</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 178 178</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>mod.svm3<span class="sc">$</span>nSV</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 150 150</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+<li><p>Visualiser les 3 svm obtenues. Interpréter.</p>
+<div class="cell" data-teacher="true" data-hash="05-svm_cache/html/trace-trois-svm_6a2dd836348b6727cf84658957f16fa4">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mod.svm1,<span class="at">data=</span>df3,<span class="at">grid=</span><span class="dv">250</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/trace-trois-svm-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mod.svm2,<span class="at">data=</span>df3,<span class="at">grid=</span><span class="dv">250</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/trace-trois-svm-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mod.svm3,<span class="at">data=</span>df3,<span class="at">grid=</span><span class="dv">250</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/trace-trois-svm-3.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="corR">
+<p>Pour <span class="math inline">\(C\)</span> petit, toutes les observations sont classées <code>0</code>, la marge est grande et le nombre de vecteurs supports importants. On remarque que ces deux quantités diminuent lorsque <span class="math inline">\(C\)</span> augmente.</p>
+</div></li>
+<li><p>Sélectionner une valeur de <span class="math inline">\(C\)</span> parmi les trois proposées. On pourra utiliser la fonction <code>tune_grid</code>.</p>
+<div class="cell" data-teacher="true" data-hash="05-svm_cache/html/unnamed-chunk-21_638b181a24c451f69155b0ce6d1a2b56">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>tune_spec <span class="ot">&lt;-</span> <span class="fu">svm_poly</span>(<span class="at">cost=</span><span class="fu">tune</span>(),<span class="at">degree=</span><span class="dv">1</span>,<span class="at">scale_factor=</span><span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"classification"</span>) <span class="sc">|&gt;</span> <span class="fu">set_engine</span>(<span class="st">"kernlab"</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>svm_wf <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">|&gt;</span> <span class="fu">add_model</span>(tune_spec) <span class="sc">|&gt;</span> </span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_formula</span>(Y <span class="sc">~</span> .)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>re_ech_cv <span class="ot">&lt;-</span> <span class="fu">vfold_cv</span>(df3,<span class="at">v=</span><span class="dv">10</span>)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>grille_C <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">cost=</span><span class="fu">c</span>(<span class="fl">0.000001</span>,<span class="fl">0.1</span>,<span class="dv">5</span>))</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>svm.cv <span class="ot">&lt;-</span> svm_wf <span class="sc">|&gt;</span> <span class="fu">tune_grid</span>(<span class="at">resamples =</span> re_ech_cv,</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>                              <span class="at">grid =</span> grille_C,</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>                              <span class="at">metrics=</span><span class="fu">metric_set</span>(accuracy))</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>On obtient les résultats avec</p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>svm.cv <span class="sc">|&gt;</span> <span class="fu">collect_metrics</span>()</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 3 × 7</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="do">##       cost .metric  .estimator  mean     n std_err .config  </span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="do">##      &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;    </span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 0.000001 accuracy binary     0.531    10 0.0176  Preproce…</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 0.1      accuracy binary     0.936    10 0.0100  Preproce…</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 3 5        accuracy binary     0.942    10 0.00854 Preproce…</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>svm.cv <span class="sc">|&gt;</span> <span class="fu">select_best</span>()</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 1 × 2</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="do">##    cost .config             </span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;dbl&gt; &lt;chr&gt;               </span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="do">## 1     5 Preprocessor1_Model3</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+</ol>
+</section>
+<section id="lastuce-du-noyau" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="lastuce-du-noyau"><span class="header-section-number">5.3</span> L’astuce du noyau</h2>
+<p>Les SVM présentées précédemment font l’hypothèse que les groupes sont <strong>linéairement séparables</strong>, ce qui n’est bien entendu pas toujours le cas en pratique. L’<strong>astuce du noyau</strong> permet de mettre de la non linéarité, elle consiste à :</p>
+<ul>
+<li>plonger les données dans un nouvel espace appelé <strong>espace de représentation</strong> ou <strong>feature space</strong> ;</li>
+<li>appliquer une <strong>svm</strong> linéaire dans ce nouvel espace.</li>
+</ul>
+<p>Le terme <strong>astuce</strong> vient du fait que ce procédé ne nécessite pas de connaître explicitement ce nouvel espace : pour résoudre le problème d’optimisation dans le <strong>feature space</strong> on a juste besoin de connaître le <strong>noyau</strong> associé au feature space. D’un point de vu formel un noyau est une fonction <span class="math display">\[K:\mathcal X\times\mathcal X\to\mathbb R\]</span> dont les propriétés sont proches d’un produit scalaire. Il existe donc tout un tas de noyau avec lesquels on peut faire des SVM, par exemple</p>
+<ul>
+<li><strong>Linéaire</strong> (sur <span class="math inline">\(\mathbb R^d\)</span>) : <span class="math inline">\(K(x,x')=x^tx'\)</span>.</li>
+<li><strong>Polynomial</strong> (sur <span class="math inline">\(\mathbb R^d\)</span>) : <span class="math inline">\(K(x,x')=(x^tx'+1)^d\)</span>.</li>
+<li><strong>Gaussien</strong> (Gaussian radial basis function ou RBF) (sur <span class="math inline">\(\mathbb R^d\)</span>) <span class="math display">\[K(x,x')=\exp\left(-\frac{\|x-x'\|}{2\sigma^2}\right).\]</span></li>
+<li><strong>Laplace</strong> (sur <span class="math inline">\(\mathbb R\)</span>) : <span class="math inline">\(K(x,x')=\exp(-\gamma|x-x'|)\)</span>.</li>
+<li><strong>Noyau min</strong> (sur <span class="math inline">\(\mathbb R^+\)</span>) : <span class="math inline">\(K(x,x')=\min(x,x')\)</span>.</li>
+<li>…</li>
+</ul>
+<p>Bien entendu, en pratique tout le problème va consister à <strong>trouver le bon noyau</strong> !</p>
+<p>On considère le jeu de données suivant où le problème est d’expliquer <span class="math inline">\(Y\)</span> par <span class="math inline">\(V1\)</span> et <span class="math inline">\(V2\)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">13</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">runif</span>(n<span class="sc">*</span><span class="dv">2</span>,<span class="sc">-</span><span class="dv">2</span>,<span class="dv">2</span>),<span class="at">ncol=</span><span class="dv">2</span>) <span class="sc">|&gt;</span> <span class="fu">as.data.frame</span>()</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>,n)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>cond <span class="ot">&lt;-</span> (X<span class="sc">$</span>V1<span class="sc">^</span><span class="dv">2</span><span class="sc">+</span>X<span class="sc">$</span>V2<span class="sc">^</span><span class="dv">2</span>)<span class="sc">&lt;=</span><span class="fl">2.8</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>Y[cond] <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="fu">sum</span>(cond),<span class="dv">1</span>,<span class="fl">0.9</span>)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>Y[<span class="sc">!</span>cond] <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="fu">sum</span>(<span class="sc">!</span>cond),<span class="dv">1</span>,<span class="fl">0.1</span>)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> X <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">Y=</span><span class="fu">as.factor</span>(Y))</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df)<span class="sc">+</span><span class="fu">aes</span>(<span class="at">x=</span>V2,<span class="at">y=</span>V1,<span class="at">color=</span>Y)<span class="sc">+</span><span class="fu">geom_point</span>()<span class="sc">+</span><span class="fu">theme_classic</span>()</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<ol type="1">
+<li><p>Ajuster une svm linéaire et visualiser l’hyperplan séparateur. Que remarquez-vous ?</p>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>mod.svm0 <span class="ot">&lt;-</span> <span class="fu">svm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df,<span class="at">kernel=</span><span class="st">"linear"</span>,<span class="at">cost=</span><span class="dv">1</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mod.svm0,df,<span class="at">grid=</span><span class="dv">250</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="corR">
+<p>La svm linéaire ne permet pas de séparer les groupes (on pouvait s’y attendre).</p>
+</div></li>
+<li><p>Exécuter la commande suivante et commenter la sortie.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>mod.svm1 <span class="ot">&lt;-</span> <span class="fu">svm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df,<span class="at">kernel=</span><span class="st">"radial"</span>,<span class="at">gamma=</span><span class="dv">1</span>,<span class="at">cost=</span><span class="dv">1</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mod.svm1,df,<span class="at">grid=</span><span class="dv">250</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="corR">
+<p>Le noyau radial permet de mettre en évidence une séparation non linéaire.</p>
+</div></li>
+<li><p>Faire varier les paramètres <strong>gamma</strong> et <strong>cost</strong>. Interpréter (on pourra notamment étudier l’évolution du nombre de vecteurs supports en fonction du paramètre <strong>cost</strong>).</p>
+<div class="cell" data-teacher="true" data-hash="05-svm_cache/html/svm-test-gamma-cost_62dd854d4787f89f06cec212fa8e9e42">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>mod.svm2 <span class="ot">&lt;-</span> <span class="fu">svm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df,<span class="at">kernel=</span><span class="st">"radial"</span>,<span class="at">gamma=</span><span class="dv">1</span>,<span class="at">cost=</span><span class="fl">0.0001</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>mod.svm3 <span class="ot">&lt;-</span> <span class="fu">svm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df,<span class="at">kernel=</span><span class="st">"radial"</span>,<span class="at">gamma=</span><span class="dv">1</span>,<span class="at">cost=</span><span class="dv">1</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>mod.svm4 <span class="ot">&lt;-</span> <span class="fu">svm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df,<span class="at">kernel=</span><span class="st">"radial"</span>,<span class="at">gamma=</span><span class="dv">1</span>,<span class="at">cost=</span><span class="dv">100000</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mod.svm2,df,<span class="at">grid=</span><span class="dv">250</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/svm-test-gamma-cost-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mod.svm3,df,<span class="at">grid=</span><span class="dv">250</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/svm-test-gamma-cost-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mod.svm4,df,<span class="at">grid=</span><span class="dv">250</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/svm-test-gamma-cost-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>mod.svm2<span class="sc">$</span>nSV</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 244 244</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>mod.svm3<span class="sc">$</span>nSV</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 114 114</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>mod.svm4<span class="sc">$</span>nSV</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 78 77</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>Le nombre de vecteurs supports diminue lorsque <span class="math inline">\(C\)</span> augmente. Une forte valeur de <span class="math inline">\(C\)</span> autorise moins d’observations à être dans la marge, elle a donc tendance à diminuer (risque de surapprentissage).</p>
+</div></li>
+<li><p>Sélectionner automatiquement ces paramètres. On pourra utiliser la fonction <strong>tune</strong> en faisant varier <strong>C</strong> dans <strong>c(0.1,1,10,100,1000)</strong> et <strong>gamma</strong> dans <strong>c(0.5,1,2,3,4)</strong>.</p>
+<div class="cell" data-teacher="true" data-hash="05-svm_cache/html/svm-cv-tune_7819cc2eac1ece103f0449083df32f1f">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>tune.out <span class="ot">&lt;-</span> <span class="fu">tune</span>(svm,Y<span class="sc">~</span>.,<span class="at">data=</span>df,<span class="at">kernel=</span><span class="st">"radial"</span>,</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">ranges=</span><span class="fu">list</span>(<span class="at">cost=</span><span class="fu">c</span>(<span class="fl">0.1</span>,<span class="dv">1</span>,<span class="dv">10</span>,<span class="dv">100</span>,<span class="dv">1000</span>),<span class="at">gamma=</span><span class="fu">c</span>(<span class="fl">0.5</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>)))</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(tune.out)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Parameter tuning of 'svm':</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="do">## - sampling method: 10-fold cross validation </span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="do">## - best parameters:</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a><span class="do">##  cost gamma</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a><span class="do">##    10   0.5</span></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a><span class="do">## - best performance: 0.108 </span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a><span class="do">## - Detailed performance results:</span></span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a><span class="do">##     cost gamma error dispersion</span></span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a><span class="do">## 1  1e-01   0.5 0.182 0.04565572</span></span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a><span class="do">## 2  1e+00   0.5 0.148 0.03155243</span></span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a><span class="do">## 3  1e+01   0.5 0.108 0.03425395</span></span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a><span class="do">## 4  1e+02   0.5 0.116 0.03373096</span></span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a><span class="do">## 5  1e+03   0.5 0.112 0.03425395</span></span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a><span class="do">## 6  1e-01   1.0 0.184 0.04402020</span></span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a><span class="do">## 7  1e+00   1.0 0.120 0.03651484</span></span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a><span class="do">## 8  1e+01   1.0 0.120 0.03126944</span></span>
+<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a><span class="do">## 9  1e+02   1.0 0.112 0.03155243</span></span>
+<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a><span class="do">## 10 1e+03   1.0 0.120 0.03887301</span></span>
+<span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a><span class="do">## 11 1e-01   2.0 0.170 0.04136558</span></span>
+<span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a><span class="do">## 12 1e+00   2.0 0.124 0.02458545</span></span>
+<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a><span class="do">## 13 1e+01   2.0 0.122 0.03457681</span></span>
+<span id="cb28-31"><a href="#cb28-31" aria-hidden="true" tabindex="-1"></a><span class="do">## 14 1e+02   2.0 0.124 0.03502380</span></span>
+<span id="cb28-32"><a href="#cb28-32" aria-hidden="true" tabindex="-1"></a><span class="do">## 15 1e+03   2.0 0.142 0.03705851</span></span>
+<span id="cb28-33"><a href="#cb28-33" aria-hidden="true" tabindex="-1"></a><span class="do">## 16 1e-01   3.0 0.160 0.03651484</span></span>
+<span id="cb28-34"><a href="#cb28-34" aria-hidden="true" tabindex="-1"></a><span class="do">## 17 1e+00   3.0 0.124 0.02458545</span></span>
+<span id="cb28-35"><a href="#cb28-35" aria-hidden="true" tabindex="-1"></a><span class="do">## 18 1e+01   3.0 0.126 0.03134042</span></span>
+<span id="cb28-36"><a href="#cb28-36" aria-hidden="true" tabindex="-1"></a><span class="do">## 19 1e+02   3.0 0.132 0.04022161</span></span>
+<span id="cb28-37"><a href="#cb28-37" aria-hidden="true" tabindex="-1"></a><span class="do">## 20 1e+03   3.0 0.166 0.03272783</span></span>
+<span id="cb28-38"><a href="#cb28-38" aria-hidden="true" tabindex="-1"></a><span class="do">## 21 1e-01   4.0 0.154 0.03777124</span></span>
+<span id="cb28-39"><a href="#cb28-39" aria-hidden="true" tabindex="-1"></a><span class="do">## 22 1e+00   4.0 0.124 0.02458545</span></span>
+<span id="cb28-40"><a href="#cb28-40" aria-hidden="true" tabindex="-1"></a><span class="do">## 23 1e+01   4.0 0.126 0.03134042</span></span>
+<span id="cb28-41"><a href="#cb28-41" aria-hidden="true" tabindex="-1"></a><span class="do">## 24 1e+02   4.0 0.138 0.04467164</span></span>
+<span id="cb28-42"><a href="#cb28-42" aria-hidden="true" tabindex="-1"></a><span class="do">## 25 1e+03   4.0 0.190 0.05754226</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>La sélection est faite en minimisant l’erreur de classification par validation croisée 10 blocs.</p>
+</div></li>
+<li><p>Faire de même en utilisant <strong>tidymodels</strong></p>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>tune_spec <span class="ot">&lt;-</span> </span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">svm_rbf</span>(<span class="at">cost=</span><span class="fu">tune</span>(),<span class="at">rbf_sigma=</span><span class="fu">tune</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"classification"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"kernlab"</span>) </span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>svm_wf <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">|&gt;</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_model</span>(tune_spec) <span class="sc">|&gt;</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_formula</span>(Y <span class="sc">~</span> .)</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>grille <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">cost=</span><span class="fu">c</span>(<span class="fl">0.001</span>,<span class="fl">0.01</span>,<span class="dv">1</span>,<span class="dv">10</span>,<span class="dv">100</span>,<span class="dv">1000</span>),</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>                  <span class="at">rbf_sigma=</span><span class="fu">c</span>(<span class="fl">0.5</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>))</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>re_ech_cv <span class="ot">&lt;-</span> <span class="fu">vfold_cv</span>(df,<span class="at">v=</span><span class="dv">10</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-teacher="true" data-hash="05-svm_cache/html/svm-cv-tidy_10490942f19fb67c6ae58ceb45cd17e3">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(doParallel) <span class="do">## pour paralléliser</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>cl <span class="ot">&lt;-</span> <span class="fu">makePSOCKcluster</span>(<span class="dv">4</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="fu">registerDoParallel</span>(cl)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>svm_cv <span class="ot">&lt;-</span> svm_wf <span class="sc">|&gt;</span> </span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tune_grid</span>(</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">resamples =</span> re_ech_cv,</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">grid =</span> grille,</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">metrics=</span><span class="fu">metric_set</span>(accuracy))</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="fu">on.exit</span>(<span class="fu">stopCluster</span>(cl))</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>svm_cv <span class="sc">|&gt;</span> <span class="fu">show_best</span>()</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 5 × 8</span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a><span class="do">##    cost rbf_sigma .metric  .estimator  mean     n std_err</span></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;</span></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a><span class="do">## 1   100       0.5 accuracy binary     0.886    10  0.0143</span></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a><span class="do">## 2    10       0.5 accuracy binary     0.884    10  0.0133</span></span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a><span class="do">## 3     1       2   accuracy binary     0.884    10  0.0142</span></span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a><span class="do">## 4  1000       0.5 accuracy binary     0.882    10  0.0135</span></span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a><span class="do">## 5     1       1   accuracy binary     0.882    10  0.0117</span></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a><span class="do">## # ℹ 1 more variable: .config &lt;chr&gt;</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+<li><p>Visualiser la règle sélectionnée.</p>
+<div class="corR">
+<p>On ré-entraîne l’algorithme sur toutes les données avec les paramètres calibrés :</p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>best_par <span class="ot">&lt;-</span> svm_cv <span class="sc">|&gt;</span> <span class="fu">select_best</span>()</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>final_svm <span class="ot">&lt;-</span> </span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  svm_wf <span class="sc">|&gt;</span> </span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">finalize_workflow</span>(best_par) <span class="sc">|&gt;</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(<span class="at">data =</span> df)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>Pour visualiser la règle, on extrait le modèle ajusté dans le <code>workflow</code>, puis on le visalise avec la fonction <strong>plot</strong></p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kernlab)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">extract_fit_engine</span>(final_svm) <span class="sc">|&gt;</span> <span class="fu">plot</span>()</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ou plot(final_svm$fit$fit$fit)</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+</ol>
+</section>
+<section id="support-vector-regression" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="support-vector-regression"><span class="header-section-number">5.4</span> Support vector regression</h2>
+<p>Dans un contexte de régression (lorsque <span class="math inline">\(y_i\in\mathbb R\)</span>), on ne recherche plus la l’hyperplan qui va séparer au mieux. On va dans ce cas là cherche à approcher au mieux les valeurs de <span class="math inline">\(y_i\)</span>. Cela revient à chercher <span class="math inline">\(w\in\mathbb R^p\)</span> et <span class="math inline">\(b\in\mathbb R\)</span> tels que</p>
+<p><span class="math display">\[|\langle w,x_i\rangle+b-y_i|\leq \varepsilon\]</span></p>
+<p>avec <span class="math inline">\(\varepsilon&gt;0\)</span> petit à choisir par l’utilisateur. Par analogie avec la <strong>SVM</strong> binaire, on va ainsi chercher <span class="math inline">\((w,b)\)</span> qui minimisent</p>
+<p><span class="math display">\[\frac{1}{2}\|w\|^2\]</span> <span class="math display">\[\textrm{sous les contraintes } |y_i-\langle w,x_i\rangle-b|\leq \varepsilon,\ i=1,\dots,n,\]</span></p>
+<p>Les contraintes impliquent que toute les observations doivent se définir dans une <strong>marge</strong> ou <strong>bande</strong> de taille <span class="math inline">\(2\varepsilon\)</span>. Cette hypothèse peut amener l’utilisateur à utiliser des valeurs de <span class="math inline">\(\varepsilon\)</span> très grandes et empêcher la solution de bien ajuster le nuage de points. Pour pallier à cela, on introduit, comme dans le cas de la SVM binaire, des <strong>variables ressorts</strong> qui vont autoriser certaines observations à se situer en dehors de la marge. Le problème revient alors à trouver <span class="math inline">\((w,b,\xi,\xi^\star)\)</span> qui minimise</p>
+<p><span class="math display">\[\frac{1}{2}\|w\|^2+C\sum_{i=1}^n(\xi_i+\xi_i^\star)\]</span> <span class="math display">\[\textrm{sous les contraintes } \left\{
+      \begin{array}{l}
+        y_i-\langle w,x_i\rangle-b\leq \varepsilon+\xi_i,\ i=1,\dots,n,\\
+        \langle w,x_i\rangle+b-y_i\leq \varepsilon+\xi_i^\star,\ i=1,\dots,n \\
+        \xi_i\geq 0,\xi_i^\star\geq 0,\ i=1,\dots,n
+      \end{array}\right.
+    \]</span> Les solutions s’obtiennent exactement de la même façon que dans le cas binaire. On montre notamment que <span class="math inline">\(w^\star\)</span> s’écrit comme une combinaison linéaire de vecteurs supports :</p>
+<p><span class="math display">\[w^\star=\sum_{i=1}^n(\alpha_i^\star-\alpha_i)x_i.\]</span></p>
+<p>Les vecteurs supports sont les observations vérifiant <span class="math inline">\(\alpha_i^\star-\alpha_i\neq 0\)</span>. Ici encore il faudra calibrer le paramètre <span class="math inline">\(C\)</span> et on pourra utiliser l’astuce du noyau.</p>
+<p>On considère le nuage de points <span class="math inline">\((x_i,y_i),i=1,\dots,n\)</span> définie ci-dessous:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">321</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">30</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">runif</span>(n)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>eps <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n,<span class="dv">0</span>,<span class="fl">0.2</span>)</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">+</span>X<span class="sc">+</span>eps</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(X,Y)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df)<span class="sc">+</span><span class="fu">aes</span>(<span class="at">x=</span>X,<span class="at">y=</span>Y)<span class="sc">+</span><span class="fu">geom_point</span>()</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>p1</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>On souhaite faire une <strong>SVR</strong> permettant de prédire <span class="math inline">\(Y\)</span> par <span class="math inline">\(X\)</span>. On peut l’obtenir sur <strong>R</strong> toujours avec la fonction <strong>svm</strong> de <strong>e1071</strong>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>svr1 <span class="ot">&lt;-</span> <span class="fu">svm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df,<span class="at">kernel=</span><span class="st">"linear"</span>,<span class="at">epsilon=</span><span class="fl">0.5</span>,<span class="at">cost=</span><span class="dv">100</span>,<span class="at">scale=</span><span class="cn">FALSE</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>On choisit ici exceptionnellement de ne pas réduire les <span class="math inline">\(X\)</span>.</p>
+<ol type="1">
+<li><p>Écrire une fonction <strong>R</strong> qui, à partir d’un objet <code>svm</code>, calcule l’équation de la droite de la SVR. Cette fonction pourra également tracer cette doite ainsi que la marge.</p>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>droite_svr <span class="ot">&lt;-</span> <span class="cf">function</span>(svr,df){</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  SV <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span> <span class="fu">slice</span>(svr<span class="sc">$</span>index)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  w <span class="ot">&lt;-</span> <span class="fu">sum</span>(svr<span class="sc">$</span>coefs<span class="sc">*</span>SV[,<span class="dv">1</span>])</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  b <span class="ot">&lt;-</span> <span class="sc">-</span>svr<span class="sc">$</span>rho</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df) <span class="sc">+</span> <span class="fu">aes</span>(<span class="at">x=</span>X,<span class="at">y=</span>Y)<span class="sc">+</span><span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">data=</span>SV,<span class="at">color=</span><span class="st">"red"</span>)<span class="sc">+</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_abline</span>(<span class="at">slope=</span>w,<span class="at">intercept=</span><span class="fu">c</span>(b))<span class="sc">+</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_abline</span>(<span class="at">slope=</span>w,<span class="at">intercept=</span><span class="fu">c</span>(b<span class="sc">-</span>svr<span class="sc">$</span>epsilon,b<span class="sc">+</span>svr<span class="sc">$</span>epsilon),<span class="at">color=</span><span class="st">"red"</span>)</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">w=</span>w,<span class="at">b=</span>b,<span class="at">graph=</span>p))</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>svr11 <span class="ot">&lt;-</span> <span class="fu">droite_svr</span>(svr1,df)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>svr11<span class="sc">$</span>graph</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid" width="672"></p>
+</div>
+</div></li>
+<li><p>Comparer la <strong>SVR</strong> précédente avec celle utilisant <code>epsilon=0.6</code>.</p>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>svr2 <span class="ot">&lt;-</span> <span class="fu">svm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df,<span class="at">kernel=</span><span class="st">"linear"</span>,<span class="at">epsilon=</span><span class="fl">0.6</span>,<span class="at">cost=</span><span class="dv">100</span>,<span class="at">scale=</span><span class="cn">FALSE</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>svr22 <span class="ot">&lt;-</span> <span class="fu">droite_svr</span>(svr2,df)</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>svr22<span class="sc">$</span>graph</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/unnamed-chunk-35-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="corR">
+<p>La droite traverse moins bien le nuage de points pour cette valeur de <span class="math inline">\(\varepsilon\)</span> qui semble trop grande.</p>
+</div></li>
+<li><p>On ajoute le point de coordonnées <span class="math inline">\((0.05,3)\)</span> aux données. Discuter de la <strong>SVR</strong> pour ce nouveau jeu de données en utilisant plusieurs valeurs pour <code>C</code> et <code>epsilon</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span> <span class="fu">bind_rows</span>(<span class="fu">data.frame</span>(<span class="at">X=</span><span class="fl">0.05</span>,<span class="at">Y=</span><span class="dv">3</span>))</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>On commence par faire grandir la valeur de <code>epsilon</code> pour que toutes les observations soient dans la marge.</p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>eps3 <span class="ot">&lt;-</span> <span class="fl">0.5</span><span class="sc">*</span>(<span class="dv">3</span><span class="sc">-</span><span class="fu">min</span>(df1<span class="sc">$</span>Y))<span class="sc">-</span><span class="fl">0.01</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>svr3 <span class="ot">&lt;-</span> <span class="fu">svm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df1,<span class="at">kernel=</span><span class="st">"linear"</span>,<span class="at">epsilon=</span>eps3,<span class="at">cost=</span><span class="dv">100</span>,<span class="at">scale=</span><span class="cn">FALSE</span>)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>svr33 <span class="ot">&lt;-</span> <span class="fu">droite_svr</span>(svr3,df1)</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>svr33<span class="sc">$</span>graph</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="corR">
+<p>Toutes les observations sont bien dans la marge mais la règle n’est clairement pas pertinente. Il est préférable d’autoriser certaines observations à se situer en dehors de la marge, par exemple :</p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>svr4 <span class="ot">&lt;-</span> <span class="fu">svm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df1,<span class="at">kernel=</span><span class="st">"linear"</span>,<span class="at">epsilon=</span><span class="fl">0.5</span>,<span class="at">cost=</span><span class="dv">100</span>,<span class="at">scale=</span><span class="cn">FALSE</span>)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>svr44 <span class="ot">&lt;-</span> <span class="fu">droite_svr</span>(svr4,df1)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>svr44<span class="sc">$</span>graph</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="05-svm_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid" width="672"></p>
+</div>
+</div></li>
+</ol>
+</section>
+<section id="svm-sur-les-données-spam" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="svm-sur-les-données-spam"><span class="header-section-number">5.5</span> SVM sur les données spam</h2>
+<p>On considère le jeu de données <code>spam</code> où le problème est d’expliquer la variable <code>type</code> par les autres.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kernlab)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(spam)</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(spam<span class="sc">$</span>type)</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="do">## nonspam    spam </span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="do">##    2788    1813</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>On veut comparer plusieurs <strong>svm</strong> en utilisant le package <code>kernlab</code>. On pourra trouver un descriptif du package à cette adresse <a href="https://www.jstatsoft.org/article/view/v011i09" class="uri">https://www.jstatsoft.org/article/view/v011i09</a>.</p>
+<ol type="1">
+<li><p>Utiliser la fonction <strong>ksvm</strong> pour faire une svm linéaire et une svm à noyau gaussien. On prendra comme paramètre 1 pour <code>C</code> et pour le paramètre du noyau gaussien.</p>
+<div class="corR">
+<p>La svm linéaire correspond au noyau polynomial avec des valeurs de paramètres particulières :</p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>svm.lin <span class="ot">&lt;-</span> <span class="fu">ksvm</span>(type<span class="sc">~</span>.,<span class="at">data=</span>spam,<span class="at">kernel=</span><span class="st">"polydot"</span>,</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">C=</span><span class="dv">1</span>,<span class="at">kpar=</span><span class="fu">list</span>(<span class="at">degree=</span><span class="dv">1</span>,<span class="at">scale=</span><span class="dv">1</span>,<span class="at">offset=</span><span class="dv">0</span>))</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>Pour le noyau gaussien, il suffit d’utiliser l’option <code>kernel="rbfdot"</code> :</p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>svm.gauss <span class="ot">&lt;-</span> <span class="fu">ksvm</span>(type<span class="sc">~</span>.,<span class="at">data=</span>spam,<span class="at">kernel=</span><span class="st">"rbfdot"</span>,</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">C=</span><span class="dv">1</span>,<span class="at">kpar=</span><span class="fu">list</span>(<span class="at">sigma=</span><span class="dv">1</span>))</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+<li><p>Évaluer la performance des 2 svm précédentes en calculant l’erreur de classification par validation croisée 5 blocs. Comparer ces deux algorithmes.</p>
+<div class="corR">
+<p>Il suffit d’utiliser l’option <code>cross</code> dans <strong>ksvm</strong>.</p>
+</div>
+<div class="cell" data-teacher="true" data-hash="05-svm_cache/html/svm-lin-gaus-5folds_e79c0960e81cb4fe0ce6d7457b5b5e6d">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>svm.lin <span class="ot">&lt;-</span> <span class="fu">ksvm</span>(type<span class="sc">~</span>.,<span class="at">data=</span>spam,<span class="at">kernel=</span><span class="st">"polydot"</span>,<span class="at">C=</span><span class="dv">1</span>,</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">kpar=</span><span class="fu">list</span>(<span class="at">degree=</span><span class="dv">1</span>,<span class="at">scale=</span><span class="dv">1</span>,<span class="at">offset=</span><span class="dv">0</span>),<span class="at">cross=</span><span class="dv">5</span>)</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>svm.gauss <span class="ot">&lt;-</span> <span class="fu">ksvm</span>(type<span class="sc">~</span>.,<span class="at">data=</span>spam,<span class="at">kernel=</span><span class="st">"rbfdot"</span>,<span class="at">C=</span><span class="dv">1</span>,</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">kpar=</span><span class="fu">list</span>(<span class="at">sigma=</span><span class="dv">1</span>),<span class="at">cross=</span><span class="dv">5</span>)</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>svm.lin</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Support Vector Machine object of class "ksvm" </span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a><span class="do">## SV type: C-svc  (classification) </span></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a><span class="do">##  parameter : cost C = 1 </span></span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a><span class="do">## Polynomial kernel function. </span></span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a><span class="do">##  Hyperparameters : degree =  1  scale =  1  offset =  0 </span></span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a><span class="do">## Number of Support Vectors : 942 </span></span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a><span class="do">## Objective Function Value : -881.4942 </span></span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a><span class="do">## Training error : 0.067377 </span></span>
+<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a><span class="do">## Cross validation error : 0.071942</span></span>
+<span id="cb45-19"><a href="#cb45-19" aria-hidden="true" tabindex="-1"></a>svm.gauss</span>
+<span id="cb45-20"><a href="#cb45-20" aria-hidden="true" tabindex="-1"></a><span class="do">## Support Vector Machine object of class "ksvm" </span></span>
+<span id="cb45-21"><a href="#cb45-21" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb45-22"><a href="#cb45-22" aria-hidden="true" tabindex="-1"></a><span class="do">## SV type: C-svc  (classification) </span></span>
+<span id="cb45-23"><a href="#cb45-23" aria-hidden="true" tabindex="-1"></a><span class="do">##  parameter : cost C = 1 </span></span>
+<span id="cb45-24"><a href="#cb45-24" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb45-25"><a href="#cb45-25" aria-hidden="true" tabindex="-1"></a><span class="do">## Gaussian Radial Basis kernel function. </span></span>
+<span id="cb45-26"><a href="#cb45-26" aria-hidden="true" tabindex="-1"></a><span class="do">##  Hyperparameter : sigma =  1 </span></span>
+<span id="cb45-27"><a href="#cb45-27" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb45-28"><a href="#cb45-28" aria-hidden="true" tabindex="-1"></a><span class="do">## Number of Support Vectors : 3881 </span></span>
+<span id="cb45-29"><a href="#cb45-29" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb45-30"><a href="#cb45-30" aria-hidden="true" tabindex="-1"></a><span class="do">## Objective Function Value : -1457.267 </span></span>
+<span id="cb45-31"><a href="#cb45-31" aria-hidden="true" tabindex="-1"></a><span class="do">## Training error : 0.005868 </span></span>
+<span id="cb45-32"><a href="#cb45-32" aria-hidden="true" tabindex="-1"></a><span class="do">## Cross validation error : 0.199957</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>On remarque que l’erreur de classification est plus faible pour la svm linéaire. De plus, il y a un gros écart entre l’erreur de prévision et l’erreur d’ajustement pour le noyau gaussien, il est fort possible que l’on soit en sur-apprentissage avec ces valeurs de paramètres.</p>
+</div></li>
+<li><p>Refaire la svm à noyau gaussien avec l’option <code>kpar='automatic'</code>. Expliquer.</p>
+<div class="cell" data-teacher="true" data-hash="05-svm_cache/html/svm-gauss-5folds_2c95cb525c98dd4bb842ba9c497a09fe">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>svm.gauss <span class="ot">&lt;-</span> <span class="fu">ksvm</span>(type<span class="sc">~</span>.,<span class="at">data=</span>spam,<span class="at">kernel=</span><span class="st">"rbfdot"</span>,</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">C=</span><span class="dv">1</span>,<span class="at">kpar=</span><span class="st">'automatic'</span>,<span class="at">cross=</span><span class="dv">5</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>svm.gauss</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Support Vector Machine object of class "ksvm" </span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="do">## SV type: C-svc  (classification) </span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="do">##  parameter : cost C = 1 </span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a><span class="do">## Gaussian Radial Basis kernel function. </span></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a><span class="do">##  Hyperparameter : sigma =  0.0298786979455573 </span></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a><span class="do">## Number of Support Vectors : 1412 </span></span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a><span class="do">## Objective Function Value : -807.0795 </span></span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a><span class="do">## Training error : 0.045642 </span></span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a><span class="do">## Cross validation error : 0.068461</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>Le paramètre du noyau est ici calibré à partir d’une heuristique. La valeur choisie semble pertinente puisque l’erreur de prévision a diminué et est maintenant proche de l’erreur d’ajustement.</p>
+</div></li>
+<li><p>On s’intéresse maintenant à l’AUC. À partir de validation croisée, sélectionner un noyau (linéaire ou gaussien) ainsi que des valeurs de paramètres associés au noyau, sans oublier le paramètre C. On pourra utiliser le package <strong>tidymodels</strong> et comparer le résultat obtenu à celui d’une forêt aléatoire.</p>
+<div class="corR">
+<p>Il faut tout d’abord initier le workflow. On peut consulter la page <a href="https://www.tidymodels.org/find/parsnip/" class="uri">https://www.tidymodels.org/find/parsnip/</a> pour identifier les identifiants des paramètres. On fait les choix suivants :</p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>tune_spec_svm <span class="ot">&lt;-</span> </span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">svm_rbf</span>(<span class="at">cost=</span><span class="fu">tune</span>(),<span class="at">rbf_sigma =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"classification"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"kernlab"</span>)</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>svm_wf <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_model</span>(tune_spec_svm) <span class="sc">|&gt;</span></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_formula</span>(type <span class="sc">~</span> .)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>On définit ensuite des grilles et la méthode de ré-échantillonnage.</p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>re_ech_cv <span class="ot">&lt;-</span> <span class="fu">vfold_cv</span>(spam,<span class="at">v=</span><span class="dv">4</span>)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>C <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.01</span>,<span class="fl">0.1</span>,<span class="dv">1</span>,<span class="dv">10</span>)</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.001</span>,<span class="fl">0.01</span>,<span class="fl">0.05</span>,<span class="fl">0.2</span>,<span class="dv">1</span>)</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>grille <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">cost=</span>C,<span class="at">rbf_sigma=</span>sigma) <span class="sc">|&gt;</span> <span class="fu">as_tibble</span>()</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-teacher="true" data-hash="05-svm_cache/html/unnamed-chunk-44_7ea0082558095c8d1c7b802b759d88ea">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>cl <span class="ot">&lt;-</span> <span class="fu">makePSOCKcluster</span>(<span class="dv">4</span>)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="fu">registerDoParallel</span>(cl)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>svm.cv <span class="ot">&lt;-</span> svm_wf <span class="sc">|&gt;</span> </span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tune_grid</span>(<span class="at">resamples =</span> re_ech_cv,</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">grid =</span> grille,</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">control=</span><span class="fu">control_resamples</span>(<span class="at">save_pred =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">metrics=</span><span class="fu">metric_set</span>(roc_auc))</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a><span class="fu">stopCluster</span>(cl)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>svm.cv <span class="sc">|&gt;</span> <span class="fu">collect_metrics</span>()</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 20 × 8</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="do">##     cost rbf_sigma .metric .estimator  mean     n  std_err</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="do">##    &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;    &lt;dbl&gt;</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="do">##  1  0.01     0.001 roc_auc binary     0.942     4 0.00315 </span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a><span class="do">##  2  0.1      0.001 roc_auc binary     0.945     4 0.00301 </span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a><span class="do">##  3  1        0.001 roc_auc binary     0.960     4 0.00248 </span></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a><span class="do">##  4 10        0.001 roc_auc binary     0.968     4 0.00265 </span></span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a><span class="do">##  5  0.01     0.01  roc_auc binary     0.949     4 0.00205 </span></span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a><span class="do">##  6  0.1      0.01  roc_auc binary     0.961     4 0.00163 </span></span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a><span class="do">##  7  1        0.01  roc_auc binary     0.972     4 0.00118 </span></span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a><span class="do">##  8 10        0.01  roc_auc binary     0.978     4 0.00123 </span></span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a><span class="do">##  9  0.01     0.05  roc_auc binary     0.937     4 0.00105 </span></span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a><span class="do">## 10  0.1      0.05  roc_auc binary     0.955     4 0.000806</span></span>
+<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a><span class="do">## 11  1        0.05  roc_auc binary     0.971     4 0.000266</span></span>
+<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a><span class="do">## 12 10        0.05  roc_auc binary     0.972     4 0.000844</span></span>
+<span id="cb50-17"><a href="#cb50-17" aria-hidden="true" tabindex="-1"></a><span class="do">## 13  0.01     0.2   roc_auc binary     0.938     4 0.00130 </span></span>
+<span id="cb50-18"><a href="#cb50-18" aria-hidden="true" tabindex="-1"></a><span class="do">## 14  0.1      0.2   roc_auc binary     0.940     4 0.00104 </span></span>
+<span id="cb50-19"><a href="#cb50-19" aria-hidden="true" tabindex="-1"></a><span class="do">## 15  1        0.2   roc_auc binary     0.959     4 0.00186 </span></span>
+<span id="cb50-20"><a href="#cb50-20" aria-hidden="true" tabindex="-1"></a><span class="do">## 16 10        0.2   roc_auc binary     0.957     4 0.00103 </span></span>
+<span id="cb50-21"><a href="#cb50-21" aria-hidden="true" tabindex="-1"></a><span class="do">## 17  0.01     1     roc_auc binary     0.939     4 0.000723</span></span>
+<span id="cb50-22"><a href="#cb50-22" aria-hidden="true" tabindex="-1"></a><span class="do">## 18  0.1      1     roc_auc binary     0.940     4 0.000696</span></span>
+<span id="cb50-23"><a href="#cb50-23" aria-hidden="true" tabindex="-1"></a><span class="do">## 19  1        1     roc_auc binary     0.940     4 0.00103 </span></span>
+<span id="cb50-24"><a href="#cb50-24" aria-hidden="true" tabindex="-1"></a><span class="do">## 20 10        1     roc_auc binary     0.938     4 0.00147 </span></span>
+<span id="cb50-25"><a href="#cb50-25" aria-hidden="true" tabindex="-1"></a><span class="do">## # ℹ 1 more variable: .config &lt;chr&gt;</span></span>
+<span id="cb50-26"><a href="#cb50-26" aria-hidden="true" tabindex="-1"></a>svm.cv <span class="sc">|&gt;</span> <span class="fu">show_best</span>()</span>
+<span id="cb50-27"><a href="#cb50-27" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 5 × 8</span></span>
+<span id="cb50-28"><a href="#cb50-28" aria-hidden="true" tabindex="-1"></a><span class="do">##    cost rbf_sigma .metric .estimator  mean     n  std_err</span></span>
+<span id="cb50-29"><a href="#cb50-29" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;    &lt;dbl&gt;</span></span>
+<span id="cb50-30"><a href="#cb50-30" aria-hidden="true" tabindex="-1"></a><span class="do">## 1    10     0.01  roc_auc binary     0.978     4 0.00123 </span></span>
+<span id="cb50-31"><a href="#cb50-31" aria-hidden="true" tabindex="-1"></a><span class="do">## 2     1     0.01  roc_auc binary     0.972     4 0.00118 </span></span>
+<span id="cb50-32"><a href="#cb50-32" aria-hidden="true" tabindex="-1"></a><span class="do">## 3    10     0.05  roc_auc binary     0.972     4 0.000844</span></span>
+<span id="cb50-33"><a href="#cb50-33" aria-hidden="true" tabindex="-1"></a><span class="do">## 4     1     0.05  roc_auc binary     0.971     4 0.000266</span></span>
+<span id="cb50-34"><a href="#cb50-34" aria-hidden="true" tabindex="-1"></a><span class="do">## 5    10     0.001 roc_auc binary     0.968     4 0.00265 </span></span>
+<span id="cb50-35"><a href="#cb50-35" aria-hidden="true" tabindex="-1"></a><span class="do">## # ℹ 1 more variable: .config &lt;chr&gt;</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>best <span class="ot">&lt;-</span> svm.cv <span class="sc">|&gt;</span> <span class="fu">select_best</span>()</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>best</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 1 × 3</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a><span class="do">##    cost rbf_sigma .config              </span></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;                </span></span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 1    10      0.01 Preprocessor1_Model08</span></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>final_svm <span class="ot">&lt;-</span> svm_wf <span class="sc">|&gt;</span> </span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">finalize_workflow</span>(best) <span class="sc">|&gt;</span></span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(<span class="at">data =</span> spam)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>On compare à une forêt aléatoire avec les paramètres par défaut :</p>
+</div>
+<div class="cell" data-hash="05-svm_cache/html/svm-tidy-comp3_33dedf1fcebfd8cd44b690fbe415eb2d">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>tune_spec_rf <span class="ot">&lt;-</span> </span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rand_forest</span>(<span class="at">mtry=</span><span class="fu">tune</span>(),<span class="at">trees =</span> <span class="dv">500</span>,<span class="at">min_n =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"classification"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"ranger"</span>)</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>rf_wf <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_model</span>(tune_spec_rf) <span class="sc">|&gt;</span></span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_formula</span>(type <span class="sc">~</span> .)</span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>rf.cv <span class="ot">&lt;-</span> rf_wf <span class="sc">|&gt;</span> </span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tune_grid</span>(<span class="at">resamples =</span> re_ech_cv,</span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">grid=</span><span class="fu">tibble</span>(<span class="at">mtry=</span><span class="dv">7</span>),</span>
+<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">control=</span><span class="fu">control_resamples</span>(<span class="at">save_pred =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">metrics=</span><span class="fu">metric_set</span>(roc_auc))</span>
+<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a>rf.cv <span class="sc">|&gt;</span> <span class="fu">collect_metrics</span>()  </span>
+<span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 1 × 7</span></span>
+<span id="cb52-15"><a href="#cb52-15" aria-hidden="true" tabindex="-1"></a><span class="do">##    mtry .metric .estimator  mean     n  std_err .config     </span></span>
+<span id="cb52-16"><a href="#cb52-16" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;    &lt;dbl&gt; &lt;chr&gt;       </span></span>
+<span id="cb52-17"><a href="#cb52-17" aria-hidden="true" tabindex="-1"></a><span class="do">## 1     7 roc_auc binary     0.986     4 0.000347 Preprocesso…</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>La forêt aléatoire est (légèrement) plus performante en terme d’AUC.</p>
+</div></li>
+</ol>
+</section>
+<section id="exercices" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="exercices"><span class="header-section-number">5.6</span> Exercices</h2>
+<div id="exr-exo-svm-cas-sep" class="theorem exercise">
+<p><span class="theorem-title"><strong>Exercice 5.1 (Résolution du problème d’optimisation dans le cas séparable) </strong></span>On considère <span class="math inline">\(n\)</span> observations <span class="math inline">\((x_1,y_1),\dots,(x_n,y_n)\)</span> telles que <span class="math inline">\((x_i,y_i)\in\mathbb R^p\times\{-1,1\}\)</span>. On cherche à expliquer la variable <span class="math inline">\(Y\)</span> par <span class="math inline">\(X\)</span>. On considère l’algorithme SVM et on se place dans le cas où les données sont séparables.</p>
+<ol type="1">
+<li><p>Soit <span class="math inline">\(\mathcal H\)</span> un hyperplan séparateur d’équation <span class="math inline">\(\langle w,x\rangle+b=0\)</span> où <span class="math inline">\(w\in\mathbb R^p,b\in\mathbb R\)</span>. Exprimer la distance entre <span class="math inline">\(x_i,i=1,\dots,n\)</span> et <span class="math inline">\(\mathcal H\)</span> en fonction de <span class="math inline">\(w\)</span> et <span class="math inline">\(b\)</span>.</p>
+<div class="correction">
+<p>Soit <span class="math inline">\(x_0\in\mathcal H\)</span>. La solution correspond à la norme du projeté orthogonal de <span class="math inline">\(x-x_0\)</span> sur <span class="math inline">\(\mathcal H\)</span>, elle est donc colinéaire à <span class="math inline">\(w\)</span> (car <span class="math inline">\(w\)</span> est normal à <span class="math inline">\(\mathcal H\)</span>) et s’écrit</p>
+<p><span class="math display">\[\frac{\langle x-x_0,w\rangle}{\|w\|^2}w=\frac{\langle x,w\rangle}{\|w\|^2}w-\frac{\langle x_0,w\rangle}{\|w\|^2}w,\]</span></p>
+<p>Comme <span class="math inline">\(\langle x_0,w\rangle=-b\)</span>, on déduit que, si <span class="math inline">\(\|w\|=1\)</span>, alors</p>
+<p><span class="math display">\[d_{\mathcal H}(x)=\frac{|\langle w,x\rangle+b|}{\|w\|}=|\langle w,x\rangle+b|=(\langle w,x\rangle+b)y\]</span></p>
+<p>si <span class="math inline">\(y=\text{signe}(\langle w,x\rangle+b)\)</span>.</p>
+</div></li>
+<li><p>Expliquer la logique du problème d’optimisation <span class="math display">\[\max_{w,b,\|w\|=1}M\]</span> <span class="math display">\[\textrm{sous les contraintes } y_i(\langle w,x_i\rangle+b)\geq M,\ i=1,\dots,n.\]</span></p>
+<div class="correction">
+<p>Si <span class="math inline">\((w,b)\)</span> est un hyperplan séparateur sa marge vaut</p>
+<p><span class="math display">\[\min_{i=1,\dots,n}y_i(\langle w,x_i\rangle+b).\]</span></p>
+<p>Le problème proposé revient donc à chercher l’hyperplan :</p>
+<ul>
+<li>qui sépare les groupes ;</li>
+<li>tel que la distance entre les observations et lui soit maximale.</li>
+</ul>
+</div></li>
+<li><p>Montrer que ce problème peut se réécrire <span class="math display">\[\min_{w,b}\frac{1}{2}\|w\|^2\]</span> <span class="math display">\[\textrm{sous les contraintes } y_i(\langle w,x_i\rangle+b)\geq 1,\ i=1,\dots,n.\]</span></p>
+<div class="correction">
+<p>Il suffit de poser comme contrainte <span class="math inline">\(M=1/\|w\|\)</span>.</p>
+</div></li>
+<li><p>On rappelle que pour la minimisation d’une fonction <span class="math inline">\(h:\mathbb R^p\to\mathbb R\)</span> sous contraintes affines <span class="math inline">\(g_i(u)\geq 0,i=1,\dots,n\)</span>, le Lagrangien s’écrit</p>
+<p><span class="math display">\[L(u,\alpha)=h(u)-\sum_{i=1}^n\alpha_ig_i(u).\]</span></p>
+<p>Si on désigne par <span class="math inline">\(u_\alpha=\mathop{\mathrm{argmin}}_uL(u,\alpha)\)</span>, la fonction duale est alors donnée par</p>
+<p><span class="math display">\[\theta(\alpha)=L(u_\alpha,\alpha)=\min_{u\in\mathbb R^p}L(u,\alpha),\]</span></p>
+<p>et le problème dual consiste à maximiser <span class="math inline">\(\theta(\alpha)\)</span> sous les contraintes <span class="math inline">\(\alpha_i\geq 0\)</span>. En désignant par <span class="math inline">\(\alpha^\star\)</span> la solution de ce problème, on déduit la solution du problème primal <span class="math inline">\(u^\star=u_{\alpha^\star}\)</span>. Les conditions de Karush-Kuhn-Tucker sont données par</p>
+<ul>
+<li><p><span class="math inline">\(\alpha_i^\star\geq 0\)</span>.</p></li>
+<li><p><span class="math inline">\(g_i(u_{\alpha^\star})\geq 0\)</span>.</p></li>
+<li><p><span class="math inline">\(\alpha_i^\star g_i(u_{\alpha^\star})=0\)</span>.</p></li>
+</ul>
+<ol type="a">
+<li><p>Écrire le Lagrangien du problème considéré et en déduire une expression de <span class="math inline">\(w\)</span> en fonction des <span class="math inline">\(\alpha_i\)</span> et des observations.</p>
+<div class="correction">
+<p>Le lagrangien s’écrit</p>
+<p><span class="math display">\[L(w,b;\alpha)=\frac{1}{2}\|w\|^2-\sum_{i=1}^n\alpha_i[y_i(\langle w,x_i\rangle+b)-1].\]</span> On a alors</p>
+<p><span class="math display">\[\frac{\partial L(w,b;\alpha)}{\partial w}=w-\sum_{i=1}^n\alpha_iy_ix_i=0\]</span> et</p>
+<p><span class="math display">\[\frac{\partial L(w,b;\alpha)}{\partial b}=-\sum_{i=1}^n\alpha_iy_i=0.\]</span></p>
+<p>D’où <span class="math inline">\(w_\alpha=\sum_{i=1}^n\alpha_iy_ix_i\)</span>.</p>
+</div></li>
+<li><p>Écrire la fonction duale.</p>
+<div class="correction">
+<p>La fonction duale s’écrit</p>
+<p><span class="math display">\[
+\begin{aligned}
+\theta(\alpha)=L(w_\alpha,b_\alpha;\alpha)= &amp; \        \frac{1}{2}\langle \sum_i\alpha_iy_ix_i,\sum_j\alpha_jy_jx_j\rangle-\sum_i\alpha_iy_i\langle \sum_j\alpha_jy_jx_j,x_i\rangle \\
+&amp; -\sum_i\alpha_iy_ib+\sum_i\alpha_i \\
+= &amp; \sum_{i=1}^n\alpha_i-\frac{1}{2}\sum_{i=1}^n\sum_{j=1}^n\alpha_i\alpha_jy_iy_j\langle x_i,x_j\rangle
+\end{aligned}
+\]</span></p>
+<p>On note <span class="math inline">\(\alpha_i^*\)</span> les valeurs de <span class="math inline">\(\alpha_i\)</span> qui maximisent <span class="math inline">\(\theta(\alpha)\)</span>.</p>
+</div></li>
+<li><p>Écrire les conditions KKT et en déduire les solutions <span class="math inline">\(w^\star\)</span> et <span class="math inline">\(b^\star\)</span>.</p>
+<div class="correction">
+<p>On peut déjà écrire</p>
+<p><span class="math display">\[w^\star=\sum_{i=1}^n\alpha_i^\star y_ix_i.\]</span></p>
+<p>Les conditions KKT sont pour tout <span class="math inline">\(i=1,\dots,n\)</span> :</p>
+<p><span class="math display">\[\alpha_i^\star\geq 0 \quad\text{et}\quad \alpha_i^\star[y_i(\langle w^\star,x_i\rangle+b^\star)-1]=0.\]</span></p>
+<p>On obtient <span class="math inline">\(b^\star\)</span> en résolvant</p>
+<p><span class="math display">\[\alpha_i^\star[y_i(\langle w^\star,x_i\rangle+b^\star)-1]=0\]</span></p>
+<p>pour un <span class="math inline">\(\alpha_i^\star\)</span> non nul.</p>
+</div></li>
+<li><p>Interpréter les conditions KKT.</p>
+<div class="correction">
+<p>Les <span class="math inline">\(x_i\)</span> tels que <span class="math inline">\(\alpha_i^\star&gt; 0\)</span> vérifient</p>
+<p><span class="math display">\[y_i(\langle w^\star,x_i\rangle+b^\star)=1.\]</span></p>
+<p>Ils se situent donc sur la frontière définissant la marge maximale. Ce sont les vecteurs supports.</p>
+</div></li>
+</ol></li>
+</ol>
+</div>
+<div id="exr-exo-svm-regle-main" class="theorem exercise">
+<p><span class="theorem-title"><strong>Exercice 5.2 (Règle svm à partir de sorties R) </strong></span>On considère <span class="math inline">\(n\)</span> observations <span class="math inline">\((x_1,y_1),\dots,(x_n,y_n)\)</span> telles que <span class="math inline">\((x_i,y_i)\in\mathbb R^3\times\{-1,1\}\)</span>. On cherche à expliquer la variable <span class="math inline">\(Y\)</span> par <span class="math inline">\(X=(X_1,X_2,X_3)\)</span>. On considère l’algorithme SVM et on se place dans le cas où les données sont séparables. On rappelle que cet algorithme consiste à chercher une droite d’équation <span class="math inline">\(w^tx+b=0\)</span> où <span class="math inline">\((w,b)\in\mathbb R^3\times\mathbb R\)</span> sont solutions du problème d’optimisation (problème primal)</p>
+<p><span class="math display">\[\min_{w,b}\frac{1}{2}\|w\|^2\]</span> <span class="math display">\[\textrm{sous les contraintes } y_i(w^tx_i+b)\geq 1,\ i=1,\dots,n.\]</span></p>
+<p>On désigne par <span class="math inline">\(\alpha_i^\star,i=1,\dots,n\)</span>, les solutions du problème dual et par <span class="math inline">\((w^\star,b^\star)\)</span> les solutions du problème ci-dessus.</p>
+<ol type="1">
+<li><p>Donner la formule permettant de calculer <span class="math inline">\(w^\star\)</span> en fonction des <span class="math inline">\(\alpha_i^\star\)</span>.</p>
+<div class="correction">
+<p><span class="math inline">\(w^\star\)</span> se calcule selon</p>
+<p><span class="math display">\[w^\star=\sum_{i=1}^n\alpha_i^\star y_ix_i.\]</span></p>
+<p>Les <span class="math inline">\(\alpha_i^\star\)</span> étant nuls pour les vecteurs non supports, il suffit de sommer sur les vecteur supports.</p>
+</div></li>
+<li><p>Expliquer comment on classe un nouveau point <span class="math inline">\(x\in\mathbb R^3\)</span> par la méthode <strong>svm</strong>.</p>
+<div class="correction">
+<p>Une fois <span class="math inline">\(w^\star\)</span> et <span class="math inline">\(b^\star\)</span> obtenus, la règle s’écrit</p>
+<p><span class="math display">\[g(x)=1_{\langle w^\star,x\rangle+b^\star\leq 0}-1_{\langle w^\star,x\rangle+b^\star&gt; 0}.\]</span></p>
+</div></li>
+<li><p>Les données se trouvent dans un dataframe <code>df</code>. On exécute</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">X1=</span><span class="fu">runif</span>(n),<span class="at">X2=</span><span class="fu">runif</span>(n),<span class="at">X3=</span><span class="fu">runif</span>(n))</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">X1=</span><span class="fu">scale</span>(<span class="fu">runif</span>(n)),<span class="at">X2=</span><span class="fu">scale</span>(<span class="fu">runif</span>(n)),<span class="at">X3=</span><span class="fu">scale</span>(<span class="fu">runif</span>(n)))</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">100</span>)</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>Y[X[,<span class="dv">1</span>]<span class="sc">&lt;</span>X[,<span class="dv">2</span>]] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Y &lt;- (apply(X,1,sum)&lt;=0) |&gt; as.numeric() |&gt; as.factor()</span></span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(X,<span class="at">Y=</span><span class="fu">as.factor</span>(Y))</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>mod.svm <span class="ot">&lt;-</span> <span class="fu">svm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df,<span class="at">kernel=</span><span class="st">"linear"</span>,<span class="at">cost=</span><span class="dv">10000000000</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>et on obtient</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>df[mod.svm<span class="sc">$</span>index,]</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="do">##      X1   X2   X3  Y</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a><span class="do">## 51 -1.1 -1.0 -1.0  1</span></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a><span class="do">## 92  0.7  0.8  1.1  1</span></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a><span class="do">## 31  0.7  0.5 -1.0 -1</span></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 37 -0.5 -0.6  0.3 -1</span></span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>mod.svm<span class="sc">$</span>coefs</span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a><span class="do">##      [,1]</span></span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a><span class="do">## [1,]   59</span></span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a><span class="do">## [2,]   49</span></span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a><span class="do">## [3,]  -30</span></span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a><span class="do">## [4,]  -79</span></span>
+<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a>mod.svm<span class="sc">$</span>rho</span>
+<span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.5</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Calculer les valeurs de <span class="math inline">\(w^\star\)</span> et <span class="math inline">\(b^\star\)</span>. En déduire la règle de classification.</p>
+<div class="correction">
+<p><span class="math inline">\(b^\star\)</span> est l’opposé de <code>mod.svm$rho</code>. Pour <span class="math inline">\(w^\star\)</span> il suffit d’appliquer la formule et on trouve</p>
+</div>
+<div class="cell">
+<pre><code>##    X1    X2    X3 
+## -12.1  12.6   1.2</code></pre>
+</div></li>
+<li><p>On dispose d’une nouvelle observation <span class="math inline">\(x=(1,-0.5,-1)\)</span>. Dans quel groupe (<code>-1</code> ou <code>1</code>) l’algorithme affecte cette nouvelle donnée ?</p>
+<div class="correction">
+<p>On calcule la combinaison linéaire <span class="math inline">\(\langle w^\star,x\rangle+b^\star\)</span> :</p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>newX <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">X1=</span><span class="dv">1</span>,<span class="at">X2=</span><span class="sc">-</span><span class="fl">0.5</span>,<span class="at">X3=</span><span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(w<span class="sc">*</span>newX)<span class="sc">+</span>b</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -19.1</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="correction">
+<p>On affectera donc la nouvelle donnée au groupe -1.</p>
+</div></li>
+</ol>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  let localAlternateSentinel = 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copié");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copié");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./04-lda.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Analyse discriminante linéaire</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./06-arbres.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Méthodes CART</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
