@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.433">
+<meta name="generator" content="quarto-1.3.353">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -92,8 +92,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-more-matches-text": "correspondances de plus dans ce document",
     "search-clear-button-title": "Effacer",
     "search-detached-cancel-button-title": "Annuler",
-    "search-submit-button-title": "Envoyer",
-    "search-label": "Recherche"
+    "search-submit-button-title": "Envoyer"
   }
 }</script>
 
@@ -174,7 +173,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./09-deep.html">Autres</a></li><li class="breadcrumb-item"><a href="./10-dondes.html"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Données déséquilibrées</span></a></li></ol></nav>
       <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Basculer la barre latérale" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
       </a>
-      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+      <button type="button" class="btn quarto-search-button" aria-label="Recherche" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
       </button>
     </div>
@@ -403,7 +402,7 @@ div.correction {
 <li><p>Pour <strong>P2</strong>, calculer, avec les fonctions usuelles de <code>R</code>, l’<strong>accuracy</strong>, le <strong>recall</strong> et la <strong>précision</strong>.</p></li>
 <li><p>En déduire le F1-score.</p></li>
 <li><p>Même question pour le <span class="math inline">\(\kappa\)</span> de Cohen.</p></li>
-<li><p>Retrouver ces indicateurs à l’aide des fonctions de package <code>yardstick</code> (voir <a href="https://yardstick.tidymodels.org/articles/metric-types.html#metrics" class="uri">https://yardstick.tidymodels.org/articles/metric-types.html#metrics</a>). On pourra notamment utiliser la fonction <strong>metric_set</strong>. Utiliser également la fonction <strong>confusionMatrix</strong> de <strong>caret</strong>. ANalyser les prévisions <strong>P1</strong> et <strong>P2</strong>.</p>
+<li><p>Retrouver ces indicateurs à l’aide des fonctions de package <code>yardstick</code> (voir <a href="https://yardstick.tidymodels.org/articles/metric-types.html#metrics" class="uri">https://yardstick.tidymodels.org/articles/metric-types.html#metrics</a>). On pourra notamment utiliser la fonction <strong>metric_set</strong>. Utiliser également la fonction <strong>confusionMatrix</strong> de <strong>caret</strong>. Analyser les prévisions <strong>P1</strong> et <strong>P2</strong>.</p>
 <div class="corR">
 <p>L’<strong>accuracy</strong> privilégie clairement <strong>P1</strong> alors que d’autres critères comme le <strong>balanced accuracy</strong>, le <strong>F1-score</strong> ou le <strong>kappa de Cohen</strong> vont sélectionner <strong>P2</strong>. Ces derniers critères sont mieux adaptés pour prendre en considération la capacité à bien identifier la classe minoritaire.</p>
 </div></li>
@@ -452,19 +451,6 @@ div.correction {
 <li><p>On commence par faire du <strong>oversampling</strong> avec la fonction <strong>step_upsample</strong> du package <code>themis</code>. On pourra s’inspire de <a href="https://github.com/tidymodels/themis" class="uri">https://github.com/tidymodels/themis</a>.</p>
 <ol type="a">
 <li><p>Effectuer le ré-échantillonnage et expliquer.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(themis)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">recipe</span>(Y <span class="sc">~</span> ., <span class="at">data =</span> df) <span class="sc">|&gt;</span> </span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_upsample</span>(Y) <span class="sc">|&gt;</span> </span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(<span class="at">new_data =</span> <span class="cn">NULL</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(Y)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 2 × 2</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="do">##   Y         n</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;fct&gt; &lt;int&gt;</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 0        80</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 1        80</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 <div class="corR">
 <p>On duplique des observations du groupe 1 pour atteindre le nombre d’observations du groupe 0.</p>
 </div></li>
@@ -489,13 +475,13 @@ div.correction {
 <div class="corR">
 <p>Toutes les observations des nouvelles données sont différentes des précédentes. On remarque que ce n’est plus le cas avec le jeu de paramètres suivant où la méthode <code>ROSE</code> devient un mélange de random oversampling et under sampling.</p>
 </div></li>
-<li><p>On souhaite maintenant ré-équilibrer par <strong>random undersampling</strong>. Utiliser la fonction <strong>stepdownsample</strong> pour effectuer un tel ré-équilibrage. Ici encore on pourra faire varier les paramètres.</p>
+<li><p>On souhaite maintenant ré-équilibrer par <strong>random undersampling</strong>. Utiliser la fonction <strong>step_downsample</strong> pour effectuer un tel ré-équilibrage. Ici encore on pourra faire varier les paramètres.</p>
 <div class="corR">
 <p>On supprime des observations du groupe 0 pour avoir le même nombre d’observations dans les deux groupes. Ici encore on peut contrôler le niveau de ré-équilibrage avec <code>under_ratio</code> :</p>
 </div></li>
 <li><p>On passe maintenant à l’algorithme <strong>Tomek</strong>.</p>
 <ol type="a">
-<li><p>Sans utiliser la fonction <strong>TomekClassif</strong> identifier les paires d’observations qui ont un <strong>lien de Tomek</strong>. On pourra utiliser la fonction <strong>nng</strong> du package <code>cccd</code>.</p>
+<li><p>Sans utiliser la fonction <strong>step_tomek</strong> identifier les paires d’observations qui ont un <strong>lien de Tomek</strong>. On pourra utiliser la fonction <strong>nng</strong> du package <code>cccd</code>.</p>
 <div class="corR">
 <p>On rappelle que deux observations ont un lien de Tomek si elles sont plus proches voisins mutuels et de deux groupes différents. On commence donc par identifier les plus proches voisins mutuels :</p>
 </div>
@@ -510,17 +496,17 @@ div.correction {
 <div id="exr-exo-dondes-comp-reeq1" class="theorem exercise">
 <p><span class="theorem-title"><strong>Exercice 10.3 (Comparer des méthodes de ré-équilibrage avec tidymodels) </strong></span>On considère les données utilisées dans l’exemple <a href="https://www.tidymodels.org/learn/models/sub-sampling/" class="uri">https://www.tidymodels.org/learn/models/sub-sampling/</a> :</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>imbal_data <span class="ot">&lt;-</span> </span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_csv</span>(<span class="st">"https://tidymodels.org/learn/models/sub-sampling/imbal_data.csv"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Class =</span> <span class="fu">factor</span>(Class))</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(imbal_data)</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 1200   16</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>imbal_data <span class="sc">|&gt;</span> <span class="fu">count</span>(Class)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 2 × 2</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="do">##   Class      n</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;fct&gt;  &lt;int&gt;</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 Class1    60</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 Class2  1140</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>imbal_data <span class="ot">&lt;-</span> </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_csv</span>(<span class="st">"https://tidymodels.org/learn/models/sub-sampling/imbal_data.csv"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Class =</span> <span class="fu">factor</span>(Class))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(imbal_data)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 1200   16</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>imbal_data <span class="sc">|&gt;</span> <span class="fu">count</span>(Class)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 2 × 2</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="do">##   Class      n</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;fct&gt;  &lt;int&gt;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 Class1    60</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 Class2  1140</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><code>Class1</code> est la classe minoritaire et représente l’évènement d’intérêt.</p>
 <ol type="1">
@@ -563,27 +549,27 @@ Le rééquilibrage n’améliore pas pour :
 <div id="exr-exo-dondes-comp-reeq" class="theorem exercise">
 <p><span class="theorem-title"><strong>Exercice 10.4 (Comparaison de méthodes de ré-équilibrage avec le package UBL) </strong></span>On considère 3 jeux de données <code>df1</code>, <code>df2</code> et <code>df3</code>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>X1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">5678</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>X2 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">9012</span>)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>R1 <span class="ot">&lt;-</span> X1<span class="sc">&lt;=</span><span class="fl">0.25</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>R2 <span class="ot">&lt;-</span> (X1<span class="sc">&gt;</span><span class="fl">0.25</span> <span class="sc">&amp;</span> X2<span class="sc">&gt;=</span><span class="fl">0.75</span>)</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>R3 <span class="ot">&lt;-</span> (X1<span class="sc">&gt;</span><span class="fl">0.25</span> <span class="sc">&amp;</span> X2<span class="sc">&lt;</span><span class="fl">0.75</span>)</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>,n)</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>Y[R1] <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="fu">sum</span>(R1),<span class="dv">1</span>,<span class="fl">0.75</span>)</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>Y[R2] <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="fu">sum</span>(R2),<span class="dv">1</span>,<span class="fl">0.75</span>)</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>Y[R3] <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="fu">sum</span>(R3),<span class="dv">1</span>,<span class="fl">0.25</span>)</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(X1,X2,Y)</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>df1<span class="sc">$</span>Y <span class="ot">&lt;-</span> <span class="fu">factor</span>(df1<span class="sc">$</span>Y)</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>indDY1 <span class="ot">&lt;-</span> <span class="fu">which</span>(df1<span class="sc">$</span>Y<span class="sc">==</span><span class="dv">1</span>)</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> df1[<span class="sc">-</span>indDY1[<span class="dv">1</span><span class="sc">:</span><span class="dv">400</span>],]</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>df3 <span class="ot">&lt;-</span> df1[<span class="sc">-</span>indDY1[<span class="dv">1</span><span class="sc">:</span><span class="dv">700</span>],]</span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> df1[<span class="fu">sample</span>(<span class="fu">nrow</span>(df1),<span class="dv">1000</span>),]</span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> df2[<span class="fu">sample</span>(<span class="fu">nrow</span>(df2),<span class="dv">1000</span>),]</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>df3 <span class="ot">&lt;-</span> df3[<span class="fu">sample</span>(<span class="fu">nrow</span>(df3),<span class="dv">1000</span>),]</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>X1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">5678</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>X2 <span class="ot">&lt;-</span> <span class="fu">runif</span>(n)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">9012</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>R1 <span class="ot">&lt;-</span> X1<span class="sc">&lt;=</span><span class="fl">0.25</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>R2 <span class="ot">&lt;-</span> (X1<span class="sc">&gt;</span><span class="fl">0.25</span> <span class="sc">&amp;</span> X2<span class="sc">&gt;=</span><span class="fl">0.75</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>R3 <span class="ot">&lt;-</span> (X1<span class="sc">&gt;</span><span class="fl">0.25</span> <span class="sc">&amp;</span> X2<span class="sc">&lt;</span><span class="fl">0.75</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>,n)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>Y[R1] <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="fu">sum</span>(R1),<span class="dv">1</span>,<span class="fl">0.75</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>Y[R2] <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="fu">sum</span>(R2),<span class="dv">1</span>,<span class="fl">0.75</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>Y[R3] <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="fu">sum</span>(R3),<span class="dv">1</span>,<span class="fl">0.25</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(X1,X2,Y)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>df1<span class="sc">$</span>Y <span class="ot">&lt;-</span> <span class="fu">factor</span>(df1<span class="sc">$</span>Y)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>indDY1 <span class="ot">&lt;-</span> <span class="fu">which</span>(df1<span class="sc">$</span>Y<span class="sc">==</span><span class="dv">1</span>)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> df1[<span class="sc">-</span>indDY1[<span class="dv">1</span><span class="sc">:</span><span class="dv">400</span>],]</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>df3 <span class="ot">&lt;-</span> df1[<span class="sc">-</span>indDY1[<span class="dv">1</span><span class="sc">:</span><span class="dv">700</span>],]</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> df1[<span class="fu">sample</span>(<span class="fu">nrow</span>(df1),<span class="dv">1000</span>),]</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> df2[<span class="fu">sample</span>(<span class="fu">nrow</span>(df2),<span class="dv">1000</span>),]</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>df3 <span class="ot">&lt;-</span> df3[<span class="fu">sample</span>(<span class="fu">nrow</span>(df3),<span class="dv">1000</span>),]</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol type="1">
 <li><p>Comparer la distribution de <strong>Y</strong> pour ces trois jeux de données et visualiser les observations.</p>
@@ -592,17 +578,17 @@ Le rééquilibrage n’améliore pas pour :
 </div></li>
 <li><p>On sépare ces 3 échantillons en un échantillon d’apprentissage et un échantillon test.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>a1 <span class="ot">&lt;-</span> <span class="fu">createDataPartition</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df1),<span class="at">p=</span><span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>a2 <span class="ot">&lt;-</span> <span class="fu">createDataPartition</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df2),<span class="at">p=</span><span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>)</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>a3 <span class="ot">&lt;-</span> <span class="fu">createDataPartition</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df3),<span class="at">p=</span><span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>)</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>train1 <span class="ot">&lt;-</span> df1[a1<span class="sc">$</span>Resample1,]</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>train2 <span class="ot">&lt;-</span> df2[a2<span class="sc">$</span>Resample1,]</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>train3 <span class="ot">&lt;-</span> df3[a3<span class="sc">$</span>Resample1,]</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>test1 <span class="ot">&lt;-</span> df1[<span class="sc">-</span>a1<span class="sc">$</span>Resample1,]</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>test2 <span class="ot">&lt;-</span> df2[<span class="sc">-</span>a2<span class="sc">$</span>Resample1,]</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>test3 <span class="ot">&lt;-</span> df3[<span class="sc">-</span>a3<span class="sc">$</span>Resample1,]</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>a1 <span class="ot">&lt;-</span> <span class="fu">createDataPartition</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df1),<span class="at">p=</span><span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>a2 <span class="ot">&lt;-</span> <span class="fu">createDataPartition</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df2),<span class="at">p=</span><span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>a3 <span class="ot">&lt;-</span> <span class="fu">createDataPartition</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df3),<span class="at">p=</span><span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>train1 <span class="ot">&lt;-</span> df1[a1<span class="sc">$</span>Resample1,]</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>train2 <span class="ot">&lt;-</span> df2[a2<span class="sc">$</span>Resample1,]</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>train3 <span class="ot">&lt;-</span> df3[a3<span class="sc">$</span>Resample1,]</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>test1 <span class="ot">&lt;-</span> df1[<span class="sc">-</span>a1<span class="sc">$</span>Resample1,]</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>test2 <span class="ot">&lt;-</span> df2[<span class="sc">-</span>a2<span class="sc">$</span>Resample1,]</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>test3 <span class="ot">&lt;-</span> df3[<span class="sc">-</span>a3<span class="sc">$</span>Resample1,]</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Ajuster une forêt aléatoire sur les 3 échantillon d’apprentissage, calculer les labels prédits sur les échantillons tests et estimer les différents indicateurs vus en cours à l’aide de <strong>confusionMatrix</strong>.</p>
 <div class="corR">
