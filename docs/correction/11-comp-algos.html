@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.550">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Apprentissage supervisé avec R - 11&nbsp; Comparaison d’algorithmes</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./references.html" rel="next">
+<link href="./10-dondes.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Pas de résultats",
+    "search-matching-documents-text": "documents trouvés",
+    "search-copy-link-title": "Copier le lien vers la recherche",
+    "search-hide-matches-text": "Cacher les correspondances additionnelles",
+    "search-more-match-text": "correspondance de plus dans ce document",
+    "search-more-matches-text": "correspondances de plus dans ce document",
+    "search-clear-button-title": "Effacer",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Annuler",
+    "search-submit-button-title": "Envoyer",
+    "search-label": "Recherche"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Apprentissage supervisé - Laurent Rouvière</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Recherche"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Basculer la navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools tools-wide">
+    <a href="./Apprentissage-supervisé-avec-R.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+    <div class="dropdown">
+      <a href="" title="Share" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Share"><i class="bi bi-share"></i></a>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://twitter.com/intent/tweet?url=|url|">
+              <i class="bi bi-bi-twitter pe-1"></i>
+            Twitter
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
+              <i class="bi bi-bi-facebook pe-1"></i>
+            Facebook
+            </a>
+          </li>
+      </ul>
+    </div>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Basculer le mode sombre"><i class="bi"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Basculer en mode lecteur">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Basculer la barre latérale" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./09-deep.html">Autres</a></li><li class="breadcrumb-item"><a href="./11-comp-algos.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Comparaison d’algorithmes</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Basculer la barre latérale" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Présentation</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Notion de risque en apprentissage</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Basculer la section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-risque.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Calcul de risques avec R</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-est-risque.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Estimation du risque par ré-échantillonnage</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-comp-risque.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Compléments</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Algorithmes linéraires</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Basculer la section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-lda.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Analyse discriminante linéaire</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-svm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Support Vector Machine (SVM)</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">Arbres et agrégation d’arbres</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Basculer la section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-arbres.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Méthodes CART</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-forets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Forêts aléatoires</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-boosting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Gradient boosting</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">Autres</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Basculer la section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-deep.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Réseaux de neurones avec Keras</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-dondes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Données déséquilibrées</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-comp-algos.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Comparaison d’algorithmes</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Références</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./09-deep.html">Autres</a></li><li class="breadcrumb-item"><a href="./11-comp-algos.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Comparaison d’algorithmes</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-comp-algo" class="quarto-section-identifier"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Comparaison d’algorithmes</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="cell">
+
+</div>
+<style>
+div.correction {
+  color: black;
+  background-color: #F0F0F0;
+  font-style: normal;
+  border: 2px solid orange;
+  border-radius: 10px;
+  padding: 1em;
+  /*display: none;*/
+}
+
+.corR {
+  font-style: italic;
+  /*display: none;*/
+}
+
+.algo{
+  color: black;
+  background-color: #F9C4ED;
+  font-style: normal;
+}
+</style>
+<p>Les chapitres précédents ont présenté plusieurs algorithmes permettant de répondre à un problème posé, le plus souvent de classification supervisée. Se pose bien entendu la question de choisir un unique algorithme. Etant donné un échantillon <span class="math inline">\(\mathcal D_n=\{(x_1,y_1),\dots,(x_n,y_y)\}\)</span> on rappelle qu’un algorithme de prévision est une fonction <span class="math display">\[g:\mathcal X\times(\mathcal X\times \mathcal Y)^n\to\mathcal Y\]</span> qui, à une nouvelle observation <span class="math inline">\(x\in\mathcal X\)</span> renverra la prévision <span class="math inline">\(g(x,\mathcal D_n)\)</span> calculée à partir de l’échantillon <span class="math inline">\(\mathcal D_n\)</span>. Cette fonction <span class="math inline">\(g\)</span> peut contenir tout un tas d’étapes comme :</p>
+<ul>
+<li>la gestion des données manquantes</li>
+<li>une procédure de choix de variables</li>
+<li>une méthode pour ré-équilibrer les données</li>
+<li>des procédures pour calibrer des paramètres (qui peuvent éventuellement inclure des validations croisées)</li>
+<li>…</li>
+</ul>
+<p>Le machine learning se focalisant sur la capacité d’un algorithme à bien prédire, les stratégies classiques pour choisir un algorithme vont (une fois de plus) consister à évaluer le pouvoir prédictif de chaque algorithme. Il n’y a rien de bien nouveau puisque cela va reposer sur les techniques présentées aux chapitres <a href="02-est-risque.html" class="quarto-xref"><span>Chapitre 2</span></a> :</p>
+<ul>
+<li>choisir un ou plusieurs critères (erreur de classification, AUC, <span class="math inline">\(F_1\)</span>-score…)</li>
+<li>choisir une procédure de ré-échantillonnage pour estimer ce critère (validation hold-out, validation croisée, OOB…).</li>
+</ul>
+<p>Nous proposons de développer une stratégie pour choisir un algorithme sur le jeu de données <strong>Internet Advertisements Data Set</strong> disponible sur cette page <a href="https://archive.ics.uci.edu/ml/datasets/internet+advertisements" class="uri">https://archive.ics.uci.edu/ml/datasets/internet+advertisements</a>. Le problème est d’identifier la présence d’une image publicitaire sur des pages webs. Il comporte</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ad.data <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">"data/ad_data.txt"</span>,<span class="at">header=</span><span class="cn">FALSE</span>,<span class="at">sep=</span><span class="st">","</span>,<span class="at">dec=</span><span class="st">"."</span>,<span class="at">na.strings =</span> <span class="st">"?"</span>,<span class="at">strip.white =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(ad.data)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 3279 1559</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Ce jeu de données contient 1558 variables explicatives, ces variables contiennent différentes caractériques de la page web (voir le site où sont présentées les données pour plus d’information). La dernière variable est la variable à expliquer, elle vaut <code>ad.</code> si présence d’une publicité, <code>nonad.</code> sinon.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(ad.data)[<span class="fu">ncol</span>(ad.data)] <span class="ot">&lt;-</span> <span class="st">"Y"</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ad.data<span class="sc">$</span>Y <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(ad.data<span class="sc">$</span>Y)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ad.data<span class="sc">$</span>Y)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="do">##    ad. nonad. </span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="do">##    459   2820</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Ce jeu de données contient des données manquantes.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(ad.data))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 2729</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>On peut les visualiser avec</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(visdat)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">vis_miss</span>(ad.data[,<span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>])</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="11-comp-algos_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>On remarque que :</p>
+<ul>
+<li>920 lignes</li>
+<li>4 colonnes (les 4 premières)</li>
+</ul>
+<p>ont au moins une valeur manquante.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(<span class="fu">is.na</span>(ad.data),<span class="dv">1</span>,any) <span class="sc">%&gt;%</span> <span class="fu">sum</span>()</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 920</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>var.na <span class="ot">&lt;-</span> <span class="fu">apply</span>(<span class="fu">is.na</span>(ad.data),<span class="dv">2</span>,any)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(ad.data)[var.na]</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] "V1" "V2" "V3" "V4"</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>On choisit de retirer ces 4 variables de l’analyse (il faudrait peut-être réfléchir un peu plus…).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ad.data1 <span class="ot">&lt;-</span> ad.data[,var.na<span class="sc">==</span><span class="cn">FALSE</span>]</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(ad.data1)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 3279 1555</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(ad.data1))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>On se retrouve donc en présence de 3279 individus et 1554 variables explicatives. On construit la matrice des <code>X</code> et le vecteur des <code>Y</code> qui sont nécessaires pour certaines fonctions comme <code>glmnet</code> :</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>X.ad <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>ad.data1)[,<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>Y.ad <span class="ot">&lt;-</span> ad.data1<span class="sc">$</span>Y</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>et on transforme la variable cible en 0-1 pour utiliser <code>gbm</code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>ad.data2 <span class="ot">&lt;-</span> ad.data1 <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">Y=</span><span class="fu">recode</span>(Y,<span class="st">"ad."</span><span class="ot">=</span><span class="dv">0</span>,<span class="st">"nonad."</span><span class="ot">=</span><span class="dv">1</span>))</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>On souhaite comparer les algorithmes présentés précédemment. Ils nécessitent les packages suivants</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(e1071)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rpart)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glmnet)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ranger)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gbm)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>On commence tout d’abord par représenter un algorithme par une fonction <strong>R</strong> qui admettra en entrée un jeu de données et renverra une unique prévision pour de nouveaux individus. On illustre ces fonctions pour prédire ce nouvel individu.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>newX <span class="ot">&lt;-</span> ad.data1[<span class="dv">1000</span>,]</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>newX.X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(X.ad[<span class="dv">1000</span>,],<span class="at">nrow=</span><span class="dv">1</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>On stockera les prévisions dans l’objet suivant</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>prev <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">algo=</span><span class="fu">c</span>(<span class="st">"SVM"</span>,<span class="st">"arbre"</span>,<span class="st">"ridge"</span>,<span class="st">"lasso"</span>,<span class="st">"foret"</span>,<span class="st">"ada"</span>,<span class="st">"logit"</span>),<span class="at">prev=</span><span class="dv">0</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li><p><strong>SVM</strong> à noyau gaussien où le choix des paramètres du noyau se fait par validation croisée 4 blocs :</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>prev.svm <span class="ot">&lt;-</span> <span class="cf">function</span>(df,newX){</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  C <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.01</span>,<span class="dv">1</span>,<span class="dv">10</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  sigma <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.1</span>,<span class="dv">1</span>,<span class="dv">3</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  gr <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">C=</span>C,<span class="at">sigma=</span>sigma)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  ctrl <span class="ot">&lt;-</span> <span class="fu">trainControl</span>(<span class="at">method=</span><span class="st">"cv"</span>,<span class="at">number=</span><span class="dv">4</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  cl <span class="ot">&lt;-</span> <span class="fu">makePSOCKcluster</span>(<span class="dv">3</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">registerDoParallel</span>(cl)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  res.svm <span class="ot">&lt;-</span> <span class="fu">train</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df,<span class="at">method=</span><span class="st">"svmRadial"</span>,<span class="at">trControl=</span>ctrl,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>                   <span class="at">tuneGrid=</span>gr,<span class="at">prob.model=</span><span class="cn">TRUE</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stopCluster</span>(cl)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(res.svm,newX,<span class="at">type=</span><span class="st">"prob"</span>)[<span class="dv">2</span>]</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>prev[<span class="dv">1</span>,<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">prev.svm</span>(ad.data1,newX)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+<li><p><strong>Arbre de classification</strong> où l’élagage est fait selon la procédure <strong>CART</strong> présentée dans le <a href="06-arbres.html" class="quarto-xref"><span>Chapitre 6</span></a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>prev.arbre <span class="ot">&lt;-</span> <span class="cf">function</span>(df,newX){</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  arbre <span class="ot">&lt;-</span> <span class="fu">rpart</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df,<span class="at">cp=</span><span class="fl">1e-8</span>,<span class="at">minsplit=</span><span class="dv">2</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  cp_opt <span class="ot">&lt;-</span> arbre<span class="sc">$</span>cptable <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> <span class="fu">filter</span>(xerror<span class="sc">==</span><span class="fu">min</span>(xerror)) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(CP) <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">%&gt;%</span> <span class="fu">as.numeric</span>()</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  arbre.opt <span class="ot">&lt;-</span> <span class="fu">prune</span>(arbre,<span class="at">cp=</span>cp_opt)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(arbre,<span class="at">newdata=</span>newX,<span class="at">type=</span><span class="st">"prob"</span>)[,<span class="dv">2</span>]</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>prev[<span class="dv">2</span>,<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">prev.arbre</span>(ad.data1,newX)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+<li><p><strong>Lasso et Ridge</strong> où le paramètre de régularisation est choisi par validation croisée 10 blocs en minimisant la déviance binomiale :</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>prev.ridge <span class="ot">&lt;-</span> <span class="cf">function</span>(df.X,df.Y,newX){</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  ridge <span class="ot">&lt;-</span> <span class="fu">cv.glmnet</span>(df.X,df.Y,<span class="at">family=</span><span class="st">"binomial"</span>,<span class="at">alpha=</span><span class="dv">0</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.vector</span>(<span class="fu">predict</span>(ridge,<span class="at">newx =</span> newX,<span class="at">type=</span><span class="st">"response"</span>))</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>prev.lasso <span class="ot">&lt;-</span> <span class="cf">function</span>(df.X,df.Y,newX){</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  lasso <span class="ot">&lt;-</span> <span class="fu">cv.glmnet</span>(df.X,df.Y,<span class="at">family=</span><span class="st">"binomial"</span>,<span class="at">alpha=</span><span class="dv">1</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.vector</span>(<span class="fu">predict</span>(lasso,<span class="at">newx =</span> newX,<span class="at">type=</span><span class="st">"response"</span>))</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>prev[<span class="dv">3</span>,<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">prev.ridge</span>(X.ad,Y.ad,newX.X)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>prev[<span class="dv">4</span>,<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">prev.lasso</span>(X.ad,Y.ad,newX.X)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+<li><p><strong>Forêt aléatoire</strong> avec les paramètres par défaut :</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>prev.foret <span class="ot">&lt;-</span> <span class="cf">function</span>(df,newX){</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  foret <span class="ot">&lt;-</span> <span class="fu">ranger</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df,<span class="at">probability=</span><span class="cn">TRUE</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(foret,<span class="at">data=</span>newX,<span class="at">type=</span><span class="st">"response"</span>)<span class="sc">$</span>predictions[,<span class="dv">2</span>]</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>prev[<span class="dv">5</span>,<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">prev.foret</span>(ad.data1,newX)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+<li><p><strong>Adaboost et logitboost</strong> avec le nombre d’itérations choisi par validation croisée 5 blocs :</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>prev.ada <span class="ot">&lt;-</span> <span class="cf">function</span>(df,newX){</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  ada <span class="ot">&lt;-</span> <span class="fu">gbm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df,<span class="at">distribution=</span><span class="st">"adaboost"</span>,<span class="at">interaction.depth=</span><span class="dv">2</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">bag.fraction=</span><span class="dv">1</span>,<span class="at">cv.folds =</span> <span class="dv">5</span>,<span class="at">n.trees=</span><span class="dv">500</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  nb.it <span class="ot">&lt;-</span> <span class="fu">gbm.perf</span>(ada,<span class="at">plot.it=</span><span class="cn">FALSE</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(ada,<span class="at">newdata=</span>newX,<span class="at">n.trees=</span>nb.it,<span class="at">type=</span><span class="st">"response"</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>prev.logit <span class="ot">&lt;-</span> <span class="cf">function</span>(df,newX){</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  logit <span class="ot">&lt;-</span> <span class="fu">gbm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df,<span class="at">distribution=</span><span class="st">"bernoulli"</span>,<span class="at">interaction.depth=</span><span class="dv">2</span>,</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>               <span class="at">bag.fraction=</span><span class="dv">1</span>,<span class="at">cv.folds =</span> <span class="dv">5</span>,<span class="at">n.trees=</span><span class="dv">500</span>)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  nb.it <span class="ot">&lt;-</span> <span class="fu">gbm.perf</span>(logit,<span class="at">plot.it=</span><span class="cn">FALSE</span>)</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(logit,<span class="at">newdata=</span>newX,<span class="at">n.trees=</span>nb.it,<span class="at">type=</span><span class="st">"response"</span>)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>}    </span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>prev[<span class="dv">6</span>,<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">prev.ada</span>(ad.data2,newX)</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>prev[<span class="dv">7</span>,<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">prev.logit</span>(ad.data2,newX)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+</ul>
+<p>On peut visualiser la prévision de chaque algorithme</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>prev</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 7 × 2</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="do">##   algo   prev</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;chr&gt; &lt;dbl&gt;</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 SVM       0</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 arbre     0</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 3 ridge     0</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="do">## 4 lasso     0</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="do">## 5 foret     0</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 6 ada       0</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 7 logit     0</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="exr-exo-comp-meth-VC" class="theorem exercise">
+<p><span class="theorem-title"><strong>Exercice 11.1 (Choix d’un algorithme par validation croisée)</strong></span> Choisir un algorithme parmi les précédents en utilisant comme critère l’erreur de classification ainsi que la courbe ROC et l’AUC. On pourra faire une validation croisée 10 blocs (même si ça peut être un peu long…).</p>
+<div class="corR">
+<p>On commence par définir les blocs</p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>bloc <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,<span class="fu">nrow</span>(ad.data1),<span class="at">replace=</span><span class="cn">TRUE</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(bloc)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="do">## bloc</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="do">##   1   2   3   4   5   6   7   8   9  10 </span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 309 327 329 310 358 354 304 337 342 309</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>On effectue la validation croisée pour obtenir un score pour chaque individu :</p>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">4321</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>score <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">matrix</span>(<span class="dv">0</span>,<span class="at">nrow=</span><span class="fu">nrow</span>(ad.data1),<span class="at">ncol=</span><span class="dv">7</span>))</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(score) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"svm"</span>,<span class="st">"arbre"</span>,<span class="st">"ridge"</span>,<span class="st">"lasso"</span>,<span class="st">"foret"</span>,<span class="st">"ada"</span>,<span class="st">"logit"</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>){</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  ind.test <span class="ot">&lt;-</span> bloc<span class="sc">==</span>k</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  dapp <span class="ot">&lt;-</span> ad.data1[<span class="sc">!</span>ind.test,]</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  dtest <span class="ot">&lt;-</span> ad.data1[ind.test,]</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  dapp2 <span class="ot">&lt;-</span> ad.data2[<span class="sc">!</span>ind.test,]</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  dtest2 <span class="ot">&lt;-</span> ad.data2[ind.test,]</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  X.app <span class="ot">&lt;-</span> X.ad[<span class="sc">!</span>ind.test,]</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  X.test <span class="ot">&lt;-</span> X.ad[ind.test,]</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  Y.app <span class="ot">&lt;-</span> Y.ad[<span class="sc">!</span>ind.test]</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  Y.test <span class="ot">&lt;-</span> Y.ad[ind.test]</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  svm.k <span class="ot">&lt;-</span> <span class="fu">prev.svm</span>(<span class="at">df=</span>dapp,<span class="at">newX =</span> dtest)</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  arbre.k <span class="ot">&lt;-</span> <span class="fu">prev.arbre</span>(<span class="at">df=</span>dapp,<span class="at">newX =</span> dtest)</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>  ridge.k <span class="ot">&lt;-</span> <span class="fu">prev.ridge</span>(<span class="at">df.X=</span>X.app,<span class="at">df.Y=</span>Y.app,<span class="at">newX=</span>X.test)</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>  lasso.k <span class="ot">&lt;-</span> <span class="fu">prev.lasso</span>(<span class="at">df.X=</span>X.app,<span class="at">df.Y=</span>Y.app,<span class="at">newX=</span>X.test)</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>  foret.k <span class="ot">&lt;-</span> <span class="fu">prev.foret</span>(<span class="at">df=</span>dapp,<span class="at">newX =</span> dtest)</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>  ada.k <span class="ot">&lt;-</span> <span class="fu">prev.ada</span>(<span class="at">df=</span>dapp2,<span class="at">newX=</span>dtest2)</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>  logit.k <span class="ot">&lt;-</span> <span class="fu">prev.logit</span>(<span class="at">df=</span>dapp2,<span class="at">newX=</span>dtest2)</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>  score[ind.test,] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">arbre=</span>svm.k,<span class="at">arbre=</span>arbre.k,<span class="at">ridge=</span>ridge.k,</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">lasso=</span>lasso.k,<span class="at">foret=</span>foret.k,<span class="at">ada=</span>ada.k,<span class="at">logit=</span>logit.k)</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>On ajoute à cette matrice score les valeurs observées que l’on recode en 0-1 :</p>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>score1 <span class="ot">&lt;-</span> score <span class="sc">%&gt;%</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">obs=</span><span class="fu">fct_recode</span>(ad.data1<span class="sc">$</span>Y,<span class="st">"0"</span><span class="ot">=</span><span class="st">"ad."</span>,<span class="st">"1"</span><span class="ot">=</span><span class="st">"nonad."</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>obs,<span class="at">names_to=</span><span class="st">"Methode"</span>,<span class="at">values_to=</span><span class="st">"score"</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>On peut maintenant déduire tous les critères en confondant les valeurs prédites aux valeurs observées.</p>
+</div>
+<div class="corR">
+<p><strong>Courbe ROC</strong></p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plotROC)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>rocplot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(score1)<span class="sc">+</span><span class="fu">aes</span>(<span class="at">m=</span>score,<span class="at">d=</span><span class="fu">as.numeric</span>(obs),<span class="at">color=</span>Methode)<span class="sc">+</span><span class="fu">geom_roc</span>()</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>rocplot</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="11-comp-algos_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="corR">
+<p><strong>AUC</strong></p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>score1 <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(Methode) <span class="sc">%&gt;%</span> <span class="fu">summarize</span>(<span class="at">AUC=</span><span class="fu">as.numeric</span>(pROC<span class="sc">::</span><span class="fu">auc</span>(obs,score))) <span class="sc">%&gt;%</span> </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">AUC=</span><span class="fu">round</span>(AUC,<span class="dv">3</span>)) <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(AUC))</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 7 × 2</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="do">##   Methode   AUC</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;chr&gt;   &lt;dbl&gt;</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 ridge   0.98 </span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 foret   0.976</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="do">## 3 lasso   0.951</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="do">## 4 logit   0.945</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 5 ada     0.94 </span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 6 arbre   0.897</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="do">## 7 svm     0.813</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p><strong>Erreur de classification</strong></p>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>score1 <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">prev=</span><span class="fu">round</span>(score),<span class="at">err=</span>prev<span class="sc">!=</span>obs) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Methode) <span class="sc">%&gt;%</span> <span class="fu">summarize</span>(<span class="at">Err_classif=</span><span class="fu">mean</span>(err)) <span class="sc">%&gt;%</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Err_classif=</span><span class="fu">round</span>(Err_classif,<span class="dv">3</span>)) <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(Err_classif)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 7 × 2</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="do">##   Methode Err_classif</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;chr&gt;         &lt;dbl&gt;</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 foret         0.029</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 arbre         0.03 </span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="do">## 3 logit         0.03 </span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 4 ridge         0.03 </span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 5 lasso         0.031</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="do">## 6 ada           0.038</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="do">## 7 svm           0.101</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="corR">
+<p>On remarque que la svm possède les plus mauvais résultats. Cela ne signifie pas forcément que la méthode est mauvaise, peut-être que les choix qui ont été faits (noyaux gaussien, et grilles de paramètres) ne sont pas pertinents. Les arbres se révèlent également peu efficaces pour la courbe ROC et l’AUC, il est rare que les arbres soient parmi les meilleurs algorithmes contrairement au gradient boosting et aux forêts aléatoires. En terme d’AUC, la régression ridge et les forêts aléatoires se distinguent avec de très bonnes performances. On choisira l’algorithme final parmi ces deux là.</p>
+</div>
+</div>
+<div id="exr-exo-comp-reeq-VC" class="theorem exercise">
+<p><span class="theorem-title"><strong>Exercice 11.2 (Choix d’un algorithme de ré-équilibrage par validation croisée)</strong></span> On considère le même jeu de données que précédemment. Choisir un algorithme de ré-équilibrage par validation croisée. Il s’agira de combiner des méthodes de ré-équilibrage (random over/under sampling, smote, tomek…) avec des algorithmes de prévision de machine learning. On pourra se restreindre au modèle logistique avec calcul des estimateurs par maximum de vraisemblance, ridge, lasso…</p>
+<div class="corR">
+<p>On recode les modalités de <span class="math inline">\(Y\)</span> en 0-1 :</p>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>ad.data1 <span class="ot">&lt;-</span> ad.data1 <span class="sc">%&gt;%</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(<span class="at">Y=</span><span class="fu">fct_recode</span>(Y,<span class="st">"0"</span><span class="ot">=</span><span class="st">"nonad."</span>,<span class="st">"1"</span><span class="ot">=</span><span class="st">"ad."</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(<span class="at">Y=</span><span class="fu">fct_inseq</span>(Y))</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>On définit d’abord les 10 blocs pour la validation croisée.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>bloc <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,<span class="fu">nrow</span>(ad.data1),<span class="at">replace=</span><span class="cn">TRUE</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(bloc)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Puis on crée une liste <code>SCORE</code> de longueur 5 dont chaque élément contiendra un dataframe avec les probabilités que l’image soit une publicité estimées par chaque méthode pour chaque algorithme de ré-équilibrage.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>score <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">matrix</span>(<span class="dv">0</span>,<span class="at">nrow=</span><span class="fu">nrow</span>(ad.data1),<span class="at">ncol=</span><span class="dv">3</span>))</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(score) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"logit"</span>,<span class="st">"lasso"</span>,<span class="st">"ridge"</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>SCORE <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">brute=</span>score,<span class="at">over=</span>score,<span class="at">smote=</span>score,<span class="at">under=</span>score,<span class="at">tomek=</span>score)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>On peut maintenant faire la validation croisée, pour chaque valeur de <code>k</code> entre 1 et 10 :</p>
+<ul>
+<li><p>on calcule les échantillons d’apprentissage et de test</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>ind.test <span class="ot">&lt;-</span> bloc<span class="sc">==</span>k</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>dapp <span class="ot">&lt;-</span> ad.data1[<span class="sc">!</span>ind.test,]</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>dtest <span class="ot">&lt;-</span> ad.data1[ind.test,]</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>X.test <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>dtest)[,<span class="sc">-</span><span class="dv">1</span>]</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+<li><p>on ré-équilibre les données d’apprentissage uniquement</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>ech.app <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">norm=</span>dapp,</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">over=</span><span class="fu">RandOverClassif</span>(Y<span class="sc">~</span>.,<span class="at">dat=</span>dapp),</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">smote=</span><span class="fu">SmoteClassif</span>(Y<span class="sc">~</span>.,<span class="at">dat=</span>dapp),</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">under=</span><span class="fu">RandUnderClassif</span>(Y<span class="sc">~</span>.,<span class="at">dat=</span>dapp),</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">tomek=</span><span class="fu">TomekClassif</span>(Y<span class="sc">~</span>.,<span class="at">dat=</span>dapp)[[<span class="dv">1</span>]])</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>mod.mat.list <span class="ot">&lt;-</span> <span class="cf">function</span>(df){<span class="fu">model.matrix</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df)[,<span class="sc">-</span><span class="dv">1</span>]}</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>Y.list <span class="ot">&lt;-</span> <span class="cf">function</span>(df) df<span class="sc">$</span>Y </span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>X.app <span class="ot">&lt;-</span> <span class="fu">lapply</span>(ech.app,mod.mat.list)</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>Y.app <span class="ot">&lt;-</span> <span class="fu">lapply</span>(ech.app,Y.list)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+<li><p>on entraîne les algorithmes logistique (MV), lasso et ridge sur tous les échantillons d’apprentissage. Le paramètre de régularisation des méthode lasso et ridge est sélectionné en faisant une validation croisée 10 blocs, c’est-à-dire que l’échantillon d’apprentissage est coupé en 10 blocs pour choisir ce paramètre</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glmnet)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>){</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  lasso <span class="ot">&lt;-</span> <span class="fu">cv.glmnet</span>(X.app[[j]],Y.app[[j]],<span class="at">family=</span><span class="st">"binomial"</span>)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  ridge <span class="ot">&lt;-</span> <span class="fu">cv.glmnet</span>(X.app[[j]],Y.app[[j]],<span class="at">family=</span><span class="st">"binomial"</span>,<span class="at">alpha=</span><span class="dv">0</span>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  logit <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>ech.app[[j]],<span class="at">family=</span><span class="st">"binomial"</span>)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+<li><p>on calcule enfin les probabilités estimées que l’image soit une publicité pour chaque individu de l’échantillon test</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>  SCORE[[j]][ind.test,] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">logit=</span><span class="fu">predict.glm</span>(logit,<span class="at">newdata=</span>dtest,<span class="at">type=</span><span class="st">"response"</span>),</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">lasso=</span><span class="fu">as.vector</span>(<span class="fu">predict</span>(lasso,<span class="at">newx=</span>X.test,<span class="at">type=</span><span class="st">"response"</span>)),</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">ridge=</span><span class="fu">as.vector</span>(<span class="fu">predict</span>(ridge,<span class="at">newx=</span>X.test,<span class="at">type=</span><span class="st">"response"</span>))</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="er">}</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+</ul>
+<p>Le code entier se trouve ci-dessous :</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">4321</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glmnet)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>score <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">matrix</span>(<span class="dv">0</span>,<span class="at">nrow=</span><span class="fu">nrow</span>(ad.data1),<span class="at">ncol=</span><span class="dv">3</span>))</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(score) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"logit"</span>,<span class="st">"lasso"</span>,<span class="st">"ridge"</span>)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>SCORE <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">brute=</span>score,<span class="at">over=</span>score,<span class="at">smote=</span>score,<span class="at">under=</span>score,<span class="at">tomek=</span>score)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>){</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(k)</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  ind.test <span class="ot">&lt;-</span> bloc<span class="sc">==</span>k</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>  dapp <span class="ot">&lt;-</span> ad.data1[<span class="sc">!</span>ind.test,]</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>  dtest <span class="ot">&lt;-</span> ad.data1[ind.test,]</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>  X.test <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>dtest)[,<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>  ech.app <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">norm=</span>dapp,</span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>                  <span class="at">over=</span><span class="fu">RandOverClassif</span>(Y<span class="sc">~</span>.,<span class="at">dat=</span>dapp),</span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>                  <span class="at">smote=</span><span class="fu">SmoteClassif</span>(Y<span class="sc">~</span>.,<span class="at">dat=</span>dapp),</span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>                  <span class="at">under=</span><span class="fu">RandUnderClassif</span>(Y<span class="sc">~</span>.,<span class="at">dat=</span>dapp),</span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>                  <span class="at">tomek=</span><span class="fu">TomekClassif</span>(Y<span class="sc">~</span>.,<span class="at">dat=</span>dapp)[[<span class="dv">1</span>]])</span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>  mod.mat.list <span class="ot">&lt;-</span> <span class="cf">function</span>(df){<span class="fu">model.matrix</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>df)[,<span class="sc">-</span><span class="dv">1</span>]}</span>
+<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a>  Y.list <span class="ot">&lt;-</span> <span class="cf">function</span>(df) df<span class="sc">$</span>Y </span>
+<span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a>  X.app <span class="ot">&lt;-</span> <span class="fu">lapply</span>(ech.app,mod.mat.list)</span>
+<span id="cb31-24"><a href="#cb31-24" aria-hidden="true" tabindex="-1"></a>  Y.app <span class="ot">&lt;-</span> <span class="fu">lapply</span>(ech.app,Y.list)</span>
+<span id="cb31-25"><a href="#cb31-25" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb31-26"><a href="#cb31-26" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>){</span>
+<span id="cb31-27"><a href="#cb31-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(j)</span>
+<span id="cb31-28"><a href="#cb31-28" aria-hidden="true" tabindex="-1"></a>    lasso <span class="ot">&lt;-</span> <span class="fu">cv.glmnet</span>(X.app[[j]],Y.app[[j]],<span class="at">family=</span><span class="st">"binomial"</span>)</span>
+<span id="cb31-29"><a href="#cb31-29" aria-hidden="true" tabindex="-1"></a>    ridge <span class="ot">&lt;-</span> <span class="fu">cv.glmnet</span>(X.app[[j]],Y.app[[j]],<span class="at">family=</span><span class="st">"binomial"</span>,<span class="at">alpha=</span><span class="dv">0</span>)</span>
+<span id="cb31-30"><a href="#cb31-30" aria-hidden="true" tabindex="-1"></a>    logit <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y<span class="sc">~</span>.,<span class="at">data=</span>ech.app[[j]],<span class="at">family=</span><span class="st">"binomial"</span>)</span>
+<span id="cb31-31"><a href="#cb31-31" aria-hidden="true" tabindex="-1"></a>    SCORE[[j]][ind.test,] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb31-32"><a href="#cb31-32" aria-hidden="true" tabindex="-1"></a>      <span class="at">logit=</span><span class="fu">predict.glm</span>(logit,<span class="at">newdata=</span>dtest,<span class="at">type=</span><span class="st">"response"</span>),</span>
+<span id="cb31-33"><a href="#cb31-33" aria-hidden="true" tabindex="-1"></a>      <span class="at">lasso=</span><span class="fu">as.vector</span>(<span class="fu">predict</span>(lasso,<span class="at">newx=</span>X.test,<span class="at">type=</span><span class="st">"response"</span>)),</span>
+<span id="cb31-34"><a href="#cb31-34" aria-hidden="true" tabindex="-1"></a>      <span class="at">ridge=</span><span class="fu">as.vector</span>(<span class="fu">predict</span>(ridge,<span class="at">newx=</span>X.test,<span class="at">type=</span><span class="st">"response"</span>))</span>
+<span id="cb31-35"><a href="#cb31-35" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb31-36"><a href="#cb31-36" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb31-37"><a href="#cb31-37" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>On assemble tous les résultats dans un seul dataframe de 4 colonnes qui contiendra une colonne :</p>
+<ul>
+<li><code>meth</code> pour le nom de l’algorithme de ré-équilibrage ;</li>
+<li><code>obs</code> pour les valeurs observées de <span class="math inline">\(Y\)</span> pour chaque individu (0 ou 1) ;</li>
+<li><code>algo</code> pour l’algorithme de prévision (logistique, lasso, ridge) ;</li>
+<li><code>score</code> pour la probabilité que l’image soit une publicité estimée par l’algorithme.</li>
+</ul>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>mat.score <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(<span class="at">brutes=</span>SCORE[[<span class="dv">1</span>]],</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>                       <span class="at">over=</span>SCORE[[<span class="dv">2</span>]],</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">smote=</span>SCORE[[<span class="dv">3</span>]],</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>                       <span class="at">under=</span>SCORE[[<span class="dv">4</span>]],</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>                       <span class="at">tomek=</span>SCORE[[<span class="dv">5</span>]],<span class="at">.id=</span><span class="st">"meth"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">obs=</span><span class="fu">rep</span>(ad.data1<span class="sc">$</span>Y,<span class="dv">5</span>))  <span class="sc">%&gt;%</span> </span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gather</span>(<span class="at">key=</span><span class="st">"algo"</span>,<span class="at">value=</span><span class="st">"score"</span>,logit,lasso,ridge)</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mat.score)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="do">##     meth obs  algo        score</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 brutes   1 logit 1.000000e+00</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 brutes   1 logit 1.000000e+00</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="do">## 3 brutes   1 logit 1.000000e+00</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 4 brutes   1 logit 2.220446e-16</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 5 brutes   1 logit 1.000000e+00</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="do">## 6 brutes   1 logit 1.000000e+00</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>On pourra déduire de cette matrice différents critères de performance. Nous commençons par l’AUC qui peut se calculer directement à partir des valeurs de score</p>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>res_auc <span class="ot">&lt;-</span> mat.score <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(meth,algo) <span class="sc">%&gt;%</span> </span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">AUC=</span><span class="fu">round</span>(pROC<span class="sc">::</span><span class="fu">auc</span>(obs,score),<span class="dv">3</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">spread</span>(<span class="at">key=</span>algo,<span class="at">value=</span>AUC)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>res_auc</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 5 × 4</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="do">## # Groups:   meth [5]</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="do">##   meth   lasso logit ridge</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 brutes 0.943 0.831 0.98 </span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 over   0.973 0.79  0.977</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 3 smote  0.973 0.68  0.977</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a><span class="do">## 4 tomek  0.95  0.763 0.979</span></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a><span class="do">## 5 under  0.956 0.787 0.964</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>La plupart des autres critères (accuracy, kappa de Cohen…) nécessitent d’avoir les groupes prédits par l’algorithme. Ces prévisions s’obtiennent en fixant un seuil <span class="math inline">\(s\)</span> entre 0 et 1 et en prédisant groupe 1 si la probabilité est plus grande que <span class="math inline">\(s\)</span>, 0 sinon. On peut utiliser des méthodes de choix automatique de seuil mais, par souci de concision, nous présentons les résultats pour le seuil de 0.5. On crée donc une nouvelle colonne <code>prev</code> qui contiendra les groupes prédits :</p>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>mat.score <span class="ot">&lt;-</span> mat.score <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">prev=</span><span class="fu">as.factor</span>(<span class="fu">round</span>(score)))</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>On peut maintenant en déduire :</p>
+<ul>
+<li><p>l’accuracy</p>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>res_acc <span class="ot">&lt;-</span> mat.score <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">ok=</span>(prev<span class="sc">==</span>obs)) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(meth,algo) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">Acc=</span><span class="fu">round</span>(<span class="fu">mean</span>(ok),<span class="dv">3</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">spread</span>(<span class="at">key=</span>algo,<span class="at">value=</span>Acc)</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>res_acc</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 5 × 4</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="do">## # Groups:   meth [5]</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a><span class="do">##   meth   lasso logit ridge</span></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 brutes 0.969 0.886 0.97 </span></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 over   0.961 0.847 0.963</span></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a><span class="do">## 3 smote  0.96  0.699 0.96 </span></span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a><span class="do">## 4 tomek  0.969 0.818 0.97 </span></span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a><span class="do">## 5 under  0.954 0.808 0.955</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+<li><p>le balanced accuracy</p>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>monba <span class="ot">&lt;-</span> <span class="cf">function</span>(prev,obs){<span class="fu">confusionMatrix</span>(prev,obs,<span class="at">positive=</span><span class="st">"1"</span>)<span class="sc">$</span>byClass[<span class="dv">11</span>]}</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>res_ba <span class="ot">&lt;-</span> mat.score <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(meth,algo) <span class="sc">%&gt;%</span> </span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">ba=</span><span class="fu">round</span>(<span class="fu">monba</span>(prev,obs),<span class="dv">3</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">spread</span>(<span class="at">key=</span>algo,<span class="at">value=</span>ba)</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>res_ba</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 5 × 4</span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="do">## # Groups:   meth [5]</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="do">##   meth   lasso logit ridge</span></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 brutes 0.898 0.832 0.9  </span></span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 over   0.931 0.806 0.935</span></span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a><span class="do">## 3 smote  0.933 0.68  0.933</span></span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a><span class="do">## 4 tomek  0.896 0.797 0.9  </span></span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a><span class="do">## 5 under  0.921 0.792 0.899</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+<li><p>le <span class="math inline">\(F_1\)</span> score</p>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>monF1 <span class="ot">&lt;-</span> <span class="cf">function</span>(prev,obs){<span class="fu">confusionMatrix</span>(prev,obs,<span class="at">positive=</span><span class="st">"1"</span>)<span class="sc">$</span>byClass[<span class="dv">7</span>]}</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>res_F1 <span class="ot">&lt;-</span> mat.score <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(meth,algo) <span class="sc">%&gt;%</span> </span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">F1=</span><span class="fu">round</span>(<span class="fu">monF1</span>(prev,obs),<span class="dv">3</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">spread</span>(<span class="at">key=</span>algo,<span class="at">value=</span>F1)</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>res_F1</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 5 × 4</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a><span class="do">## # Groups:   meth [5]</span></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a><span class="do">##   meth   lasso logit ridge</span></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 brutes 0.879 0.65  0.884</span></span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 over   0.864 0.579 0.873</span></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a><span class="do">## 3 smote  0.863 0.378 0.862</span></span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a><span class="do">## 4 tomek  0.876 0.542 0.882</span></span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a><span class="do">## 5 under  0.843 0.529 0.837</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+<li><p>le <span class="math inline">\(\kappa\)</span> de Cohen</p>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>monkappa <span class="ot">&lt;-</span> <span class="cf">function</span>(prev,obs){<span class="fu">confusionMatrix</span>(prev,obs,<span class="at">positive=</span><span class="st">"1"</span>)<span class="sc">$</span>overall[<span class="dv">2</span>]}</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>res_kappa <span class="ot">&lt;-</span> mat.score <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(meth,algo) <span class="sc">%&gt;%</span> </span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">kappa=</span><span class="fu">round</span>(<span class="fu">monkappa</span>(prev,obs),<span class="dv">3</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">spread</span>(<span class="at">key=</span>algo,<span class="at">value=</span>kappa)</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>res_kappa</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 5 × 4</span></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a><span class="do">## # Groups:   meth [5]</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a><span class="do">##   meth   lasso logit ridge</span></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a><span class="do">##   &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 brutes 0.862 0.584 0.867</span></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 over   0.842 0.491 0.851</span></span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a><span class="do">## 3 smote  0.839 0.224 0.838</span></span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a><span class="do">## 4 tomek  0.859 0.44  0.866</span></span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a><span class="do">## 5 under  0.816 0.422 0.811</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+</ul>
+<p>Il n’est pas facile de synthétiser tous ces résultats. Plusieurs tendances semblent néanmoins se dégager :</p>
+<ul>
+<li>le <strong>modèle logistique</strong> est clairement <strong>moins performant</strong> que les algorithmes ridge et lasso. Cela s’explique par le nombre important de variables dans le modèle. Les méthodes régularisées sont plus pertinentes dans ce contexte.</li>
+<li>les performances des régressions ridge et lasso sont proches, avec une <strong>préférence pour le ridge</strong>.</li>
+<li>l’apport des <strong>méthodes de ré-échantillonnage est discutable</strong> sur cet exemple. On remarque en effet les algorithmes appliqués sur les données brûtes (non ré-équilibrées) sont performants. Le ré-équilibrage peut néanmoins améliorer certains critères comme par exemple le balanced accuracy pour lequel les méthodes de sur-échantillonnage (random oversampling et smote) permettent d’améliorer.</li>
+</ul>
+<p>Nous terminons en présentant quelques résultats pour d’autres valeurs de seuil. En effet, nous avons ici calculer la plupart des critères en utilisant le seuil de 0.5 pour déduire les groupes prédits à partir des valeurs de score. Il est souvent intéressant de visualiser ces critères pour <strong>différentes valeurs de seuil</strong>, on utilise alors des grilles de score qui consistent à présenter les valeurs de critère en fonction des scores. Nous comparons ici les grilles de score de la méthode ridge appliquée sur les données brûtes et les données ré-échantillonnées par random oversampling et smote. Ces grilles peuvent aider l’utilisateur à choisir le seuil de prévision en fonction des objectifs métiers. On créé tout d’abord une fonction qui permettra d’obtenir les grilles de score :</p>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>grille.score <span class="ot">&lt;-</span> <span class="cf">function</span>(score,<span class="at">nom_algo=</span><span class="st">"ridge"</span>,<span class="at">meth=</span><span class="st">"norm"</span>,<span class="at">grille.seuil=</span><span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="at">by=</span><span class="fl">0.1</span>)){</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  S <span class="ot">&lt;-</span> score <span class="sc">%&gt;%</span> <span class="fu">filter</span>(nom_algo<span class="sc">==</span>algo <span class="sc">&amp;</span> meth<span class="sc">==</span>meth)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  S1 <span class="ot">&lt;-</span> S</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  pp <span class="ot">&lt;-</span> <span class="fu">as.character</span>(grille.seuil)</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(grille.seuil)){</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    S1 <span class="ot">&lt;-</span> S1 <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="fu">as.numeric</span>(score<span class="sc">&gt;</span>grille.seuil[i]))</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(S1)[<span class="dv">5</span><span class="sc">+</span>i] <span class="ot">&lt;-</span> pp[i]</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>  S2 <span class="ot">&lt;-</span> S1 <span class="sc">%&gt;%</span> <span class="fu">gather</span>(<span class="at">key=</span><span class="st">"seuil"</span>,<span class="at">value=</span><span class="st">"prev"</span>,<span class="sc">-</span>meth,<span class="sc">-</span>obs,<span class="sc">-</span>algo,<span class="sc">-</span>score,<span class="sc">-</span>prev) <span class="sc">%&gt;%</span> </span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>meth,<span class="sc">-</span>algo,<span class="sc">-</span>score) <span class="sc">%&gt;%</span> </span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">prev=</span><span class="fu">as.factor</span>(prev))</span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>  mat.res <span class="ot">&lt;-</span> S2 <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(seuil) <span class="sc">%&gt;%</span> </span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">sens=</span><span class="fu">sensitivity</span>(prev,obs),<span class="at">spec=</span><span class="fu">specificity</span>(prev,obs),<span class="at">Acc=</span><span class="fu">mean</span>(obs<span class="sc">==</span>prev),</span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>              <span class="at">bal.acc=</span><span class="fu">monba</span>(prev,obs),<span class="at">F1=</span><span class="fu">monF1</span>(prev,obs),<span class="at">kappa=</span><span class="fu">monkappa</span>(prev,obs))</span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>  mat.res[,<span class="dv">2</span><span class="sc">:</span><span class="dv">7</span>] <span class="ot">&lt;-</span> <span class="fu">round</span>(mat.res[,<span class="dv">2</span><span class="sc">:</span><span class="dv">7</span>],<span class="dv">3</span>)</span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(mat.res)</span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-teacher="true">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grille.score</span>(mat.score,<span class="at">nom_algo=</span><span class="st">"ridge"</span>,<span class="at">meth=</span><span class="st">"norm"</span>)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 11 × 7</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="do">##    seuil  sens  spec   Acc bal.acc     F1 kappa</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="do">##    &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="do">##  1 0     0     1     0.14    0.5    0.246 0    </span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="do">##  2 0.1   0.671 0.955 0.711   0.813  0.48  0.343</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="do">##  3 0.2   0.745 0.932 0.771   0.839  0.533 0.416</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="do">##  4 0.3   0.851 0.911 0.86    0.881  0.645 0.566</span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a><span class="do">##  5 0.4   0.918 0.885 0.913   0.901  0.74  0.69 </span></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a><span class="do">##  6 0.5   0.983 0.843 0.964   0.913  0.867 0.846</span></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a><span class="do">##  7 0.6   0.991 0.797 0.964   0.894  0.861 0.841</span></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a><span class="do">##  8 0.7   0.995 0.739 0.959   0.867  0.834 0.811</span></span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a><span class="do">##  9 0.8   0.997 0.672 0.952   0.835  0.796 0.77 </span></span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a><span class="do">## 10 0.9   0.999 0.562 0.938   0.78   0.717 0.685</span></span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a><span class="do">## 11 1     1     0     0.86    0.5   NA     0</span></span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a><span class="fu">grille.score</span>(mat.score,<span class="at">nom_algo=</span><span class="st">"ridge"</span>,<span class="at">meth=</span><span class="st">"over"</span>)</span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 11 × 7</span></span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a><span class="do">##    seuil  sens  spec   Acc bal.acc     F1 kappa</span></span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a><span class="do">##    &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a><span class="do">##  1 0     0     1     0.14    0.5    0.246 0    </span></span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a><span class="do">##  2 0.1   0.671 0.955 0.711   0.813  0.48  0.343</span></span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a><span class="do">##  3 0.2   0.745 0.932 0.771   0.839  0.533 0.416</span></span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a><span class="do">##  4 0.3   0.851 0.911 0.86    0.881  0.645 0.566</span></span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a><span class="do">##  5 0.4   0.918 0.885 0.913   0.901  0.74  0.69 </span></span>
+<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a><span class="do">##  6 0.5   0.983 0.843 0.964   0.913  0.867 0.846</span></span>
+<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a><span class="do">##  7 0.6   0.991 0.797 0.964   0.894  0.861 0.841</span></span>
+<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a><span class="do">##  8 0.7   0.995 0.739 0.959   0.867  0.834 0.811</span></span>
+<span id="cb41-28"><a href="#cb41-28" aria-hidden="true" tabindex="-1"></a><span class="do">##  9 0.8   0.997 0.672 0.952   0.835  0.796 0.77 </span></span>
+<span id="cb41-29"><a href="#cb41-29" aria-hidden="true" tabindex="-1"></a><span class="do">## 10 0.9   0.999 0.562 0.938   0.78   0.717 0.685</span></span>
+<span id="cb41-30"><a href="#cb41-30" aria-hidden="true" tabindex="-1"></a><span class="do">## 11 1     1     0     0.86    0.5   NA     0</span></span>
+<span id="cb41-31"><a href="#cb41-31" aria-hidden="true" tabindex="-1"></a><span class="fu">grille.score</span>(mat.score,<span class="at">nom_algo=</span><span class="st">"ridge"</span>,<span class="at">meth=</span><span class="st">"smote"</span>)</span>
+<span id="cb41-32"><a href="#cb41-32" aria-hidden="true" tabindex="-1"></a><span class="do">## # A tibble: 11 × 7</span></span>
+<span id="cb41-33"><a href="#cb41-33" aria-hidden="true" tabindex="-1"></a><span class="do">##    seuil  sens  spec   Acc bal.acc     F1 kappa</span></span>
+<span id="cb41-34"><a href="#cb41-34" aria-hidden="true" tabindex="-1"></a><span class="do">##    &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span id="cb41-35"><a href="#cb41-35" aria-hidden="true" tabindex="-1"></a><span class="do">##  1 0     0     1     0.14    0.5    0.246 0    </span></span>
+<span id="cb41-36"><a href="#cb41-36" aria-hidden="true" tabindex="-1"></a><span class="do">##  2 0.1   0.671 0.955 0.711   0.813  0.48  0.343</span></span>
+<span id="cb41-37"><a href="#cb41-37" aria-hidden="true" tabindex="-1"></a><span class="do">##  3 0.2   0.745 0.932 0.771   0.839  0.533 0.416</span></span>
+<span id="cb41-38"><a href="#cb41-38" aria-hidden="true" tabindex="-1"></a><span class="do">##  4 0.3   0.851 0.911 0.86    0.881  0.645 0.566</span></span>
+<span id="cb41-39"><a href="#cb41-39" aria-hidden="true" tabindex="-1"></a><span class="do">##  5 0.4   0.918 0.885 0.913   0.901  0.74  0.69 </span></span>
+<span id="cb41-40"><a href="#cb41-40" aria-hidden="true" tabindex="-1"></a><span class="do">##  6 0.5   0.983 0.843 0.964   0.913  0.867 0.846</span></span>
+<span id="cb41-41"><a href="#cb41-41" aria-hidden="true" tabindex="-1"></a><span class="do">##  7 0.6   0.991 0.797 0.964   0.894  0.861 0.841</span></span>
+<span id="cb41-42"><a href="#cb41-42" aria-hidden="true" tabindex="-1"></a><span class="do">##  8 0.7   0.995 0.739 0.959   0.867  0.834 0.811</span></span>
+<span id="cb41-43"><a href="#cb41-43" aria-hidden="true" tabindex="-1"></a><span class="do">##  9 0.8   0.997 0.672 0.952   0.835  0.796 0.77 </span></span>
+<span id="cb41-44"><a href="#cb41-44" aria-hidden="true" tabindex="-1"></a><span class="do">## 10 0.9   0.999 0.562 0.938   0.78   0.717 0.685</span></span>
+<span id="cb41-45"><a href="#cb41-45" aria-hidden="true" tabindex="-1"></a><span class="do">## 11 1     1     0     0.86    0.5   NA     0</span></span></code><button title="Copier vers le presse-papier" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copié");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copié");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./10-dondes.html" class="pagination-link" aria-label="Données déséquilibrées">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Données déséquilibrées</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./references.html" class="pagination-link" aria-label="Références">
+        <span class="nav-page-text">Références</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
